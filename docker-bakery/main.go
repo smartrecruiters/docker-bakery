@@ -3,10 +3,10 @@ package main
 import (
 	"os"
 
+	"github.com/smartrecruiters/go-tools/cli-commons"
 	"github.com/smartrecruiters/go-tools/docker-bakery/bakery"
 	"github.com/smartrecruiters/go-tools/version"
 	"github.com/urfave/cli"
-	"github.com/smartrecruiters/go-tools/cli-commons"
 )
 
 const (
