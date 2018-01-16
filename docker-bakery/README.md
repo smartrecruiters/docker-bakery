@@ -1,0 +1,165 @@
+# docker-bakery
+<!-- MarkdownTOC  depth="4" autolink="true" bracket="round" autoanchor="true" -->
+
+- [Purpose](#purpose)
+- [Features](#features)
+- [Example project](#example-project)
+- [Assumptions](#assumptions)
+- [Config](#config)
+    - [Properties config section](#properties-config-section)
+    - [Commands config section](#commands-config-section)
+- [Dockerfile.template](#dockerfiletemplate)
+- [Usage](#usage)
+- [How to apply it to your project](#how-to-apply-it-to-your-project)
+
+<!-- /MarkdownTOC -->
+
+<a name="purpose"></a>
+# Purpose
+Aim of the `docker-bakery` is to provide simple solution for automatic rebuilding of dependent images when parent image changes. 
+
+
+<a name="features"></a>
+# Features
+- Automatic triggering of dependant images builds when parent changes
+- Support for Dockerfile templating with usage of [golang template engine](https://golang.org/pkg/text/template/)
+- Support for [semantic versioning](https://semver.org) scope changes
+- Possibility to `build` and `push` docker images to custom registries
+- Possibility of providing custom `build` and `push` commands
+- Versioning with `git` tags
+- Written in `golang`  
+
+<a name="example-project"></a>
+# Example project
+See [docker-bakery-example](https://github.com/smartrecruiters/docker-bakery-example) to check how this tool works in action.
+
+
+<a name="assumptions"></a>
+# Assumptions
+ - convention: image name is equal to the parent directory name
+ - presence of Dockerfile.template will qualify image for automatic updates triggered by base images (`FROM` clause is analyzed)
+ - first line in the dockerfile must start with `FROM ` otherwise dependency will not be determined for that file
+ - scope change in the base image is propagated to the child images
+ - to benefit from dependency updates the child image must use in template variable according to the convention: `{{.BASE-IMAGE-NAME_VERSION}}` where `BASE-IMAGE-NAME` should be substituted with uppercase directory name of the base image
+ - docker file templates need to be placed in `git` repository (with defined remote) in order versioning of the images could work (versioning is done via `git tags`)
+ - additional dynamic variables will be accessible for build templating
+       
+        
+<a name="config"></a>
+# Config
+`docker-bakery` needs `config.json` to be provided. Config is used for templating `Dockerfile.template` files and build commands
+Structure of the `config.json` file is as follows:
+
+```
+ {
+ 	"properties": {
+		"DEFAULT_PULL_REGISTRY": "some-private-registry.com:9084",
+		"DEFAULT_PUSH_REGISTRY": "some-private-registry.com:9082",
+ 		"DOCKERFILE_DIR": "Reserved dynamic property, contain path to currently build image. Can be used in template.",
+ 		"IMAGE_NAME": "Reserved dynamic property, represents image name. Can be used in template.",
+ 		"IMAGE_VERSION": "Reserved dynamic property, represents new version of the image. Can be used in template."
+ 	},
+ 	"commands": {
+ 		"defaultBuildCommand": "docker build --tag {{.IMAGE_NAME}}:{{.IMAGE_VERSION}} --tag {{.DEFAULT_PUSH_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}} --tag {{.DEFAULT_PULL_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}} {{.DOCKERFILE_DIR}}",
+ 		"defaultPushCommand": "docker push {{.DEFAULT_PUSH_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}}"
+ 	}
+ }
+```
+ 
+<a name="properties-config-section"></a>
+## Properties config section
+ This section is dedicated for storing any custom properties that may be available for usage in `Dockerfile.template` files. 
+ Feel free to modify this section and provide properties according to your needs. Flat structure should be preserved.
+ 
+ This section will also be updated with dynamic properties during runtime. 
+ 
+ Following properties belong to dynamic ones:
+ - `DOCKERFILE_DIR` - will be replaced with currently processed dockerfile dir
+ - `IMAGE_NAME` - will be replaced with currently processed image name
+ - `IMAGE_VERSION` - will be replaced with currently processed image version
+ - `*_VERSION` - where `*` is the image name. There will be that many properties of this kind as many images are in hierarchy. Initially those properties will be filled with latest versions of pushed images.  
+
+<a name="commands-config-section"></a>
+## Commands config section
+This section contains two templates used for building and pushing docker images. It allows for specifying custom parameters. 
+Commands defined here as templates will be filled with available defined properties from the config section + the dynamic properties set during runtime.  
+
+<a name="dockerfiletemplate"></a>
+# Dockerfile.template
+Presence of the `Dockerfile.template` file qualifies the image for the place in hierarchy and therefore allows for triggering builds that depend from this image. It also ensures that image build will be triggered when its parent changes. 
+
+<a name="usage"></a>
+# Usage
+To make use of `docker-bakery` as convenient as possible checkout usage of `Makefiles` from the [example project](https://github.com/smartrecruiters/docker-bakery-example) that will simplify usage greatly.
+If you don't want to use makefiles you can still use `docker-bakery` tool directly.
+Checkout the CLI help via `docker-bakery -h`. 
+
+```
+COMMANDS:
+     fill-template, prepare, prepare-recipe  Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.
+     build                                   Used to build next version of the images in given scope. Optionally it can skip build of dependant images.
+     push                                    Used to push next version of the images in given scope. Optionally it can skip push of dependant images.
+     help, h                                 Shows a list of commands or help for one command
+
+
+
+
+
+
+docker-bakery fill-template -h
+NAME:
+   docker-bakery fill-template - Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.
+
+USAGE:
+   docker-bakery fill-template [command options] [arguments...]
+
+OPTIONS:
+   --input value, -i value      Required. Input Dockerfile.template.
+   --output value, -o value     Required. Output Dockerfile generated from template.
+   --config value, -c value     Required. Path to config.json with properties and build commands defined.
+   --rootDir value, --rd value  Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.
+
+
+
+
+
+
+docker-bakery build -h
+NAME:
+   docker-bakery build - Used to build next version of the images in given scope. Optionally it can skip build of dependant images.
+
+USAGE:
+   docker-bakery build [command options] [arguments...]
+
+OPTIONS:
+   --dockerfile value, -d value  Required. Path to dockerfile/dockerfile.template file that needs to be build.
+   --scope value, -s value       Required. Scope of the change used to generate the next version. Can be one of: major/minor/patch.
+   --config value, -c value      Required. Path to config.json with properties and build commands defined.
+   --root-dir value, --rd value  Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.
+   --skip-dependants, --sd       Optional. False be default. If this flag is set build of the parent will not trigger dependant builds.
+
+
+
+
+
+
+docker-bakery push -h
+NAME:
+   docker-bakery push - Used to push next version of the images in given scope. Optionally it can skip push of dependant images.
+
+USAGE:
+   docker-bakery push [command options] [arguments...]
+
+OPTIONS:
+   --dockerfile value, -d value  Required. Path to the dockerfile/dockerfile.template that needs to be pushed.
+   --scope value, -s value       Required. Scope of the change used to generate the next version. Can be one of: major/minor/patch.
+   --config value, -c value      Required. Path to config.json with properties and build commands defined.
+   --rootDir value, --rd value   Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.
+   --skip-dependants, --sd       Optional. False be default. If this flag is set build of the parent will not trigger dependant builds.
+
+```
+
+
+<a name="how-to-apply-it-to-your-project"></a>
+# How to apply it to your project
+Applying `docker-bakery` is quite simple. Take a look [here](https://github.com/smartrecruiters/docker-bakery-example#how-to-apply-it-to-your-project)
