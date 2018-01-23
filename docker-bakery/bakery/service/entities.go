@@ -7,9 +7,10 @@ import (
 
 // Corresponds to the config structure in json file
 type Config struct {
-	Properties map[string]string `json:"properties"`
-	Commands   Commands          `json:"commands"`
-	RootDir    string            `json:"rootDir"`
+	Properties        map[string]string `json:"properties"`
+	Commands          Commands          `json:"commands"`
+	RootDir           string            `json:"rootDir"`
+	AutoBuildExcludes []string          `json:"autoBuildExcludes"`
 }
 
 // Used as part of the config to contain template of build and push commands

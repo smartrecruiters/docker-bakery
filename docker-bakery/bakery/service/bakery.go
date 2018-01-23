@@ -186,6 +186,10 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 	hasDependantImages := dependencies[result.Name] != nil && len(dependencies[result.Name]) > 0
 	if shouldTriggerDependantBuilds && hasDependantImages {
 		for _, dependant := range dependencies[result.Name] {
+			if commons.Contains(config.AutoBuildExcludes, dependant.Name) {
+				fmt.Printf("Skipping dependant build of %s as it is defined in the config autoBuildExcludes section\n", dependant.Name)
+				continue
+			}
 			fmt.Printf("Triggering dependant build of %s\n", dependant.Name)
 			err = ExecuteDockerCommand(command, dependant.DockerfilePath, scope, postCmdListener, true)
 			if err != nil {
