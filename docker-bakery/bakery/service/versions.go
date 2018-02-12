@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"sort"
 	"strings"
+
+	"time"
 
 	"github.com/Masterminds/semver"
 	"github.com/smartrecruiters/go-tools/commons"
@@ -26,42 +27,23 @@ func NewPostPushListener() PostCommandListener {
 // Returns latest semantic version for the given image name available in the provided directory
 // Version is determined based on the last git tag available for that image name
 // In case no previous tags has been found the 0.0.0 is returned
-func GetLatestImageVersion(imageName string) *semver.Version {
-	listTagsCmd := exec.Command("git", "tag", "--list", fmt.Sprintf("%s@*", imageName))
-	listTagsCmd.Dir = config.RootDir
-	fmt.Printf("Executing: %s\n", listTagsCmd.Args)
-	out, err := listTagsCmd.Output()
-	if err != nil {
-		return nil
-	}
-
-	versions := make([]*semver.Version, 0)
-	scanner := bufio.NewScanner(bytes.NewReader(out))
-	for scanner.Scan() {
-		line := scanner.Text()
-		ver, err := semver.NewVersion(strings.TrimPrefix(line, imageName+"@"))
-		if err != nil {
-			commons.Debugf("Error parsing version: %s for line: %s", err, line)
-		}
-		if ver != nil {
-			versions = append(versions, ver)
-		}
-	}
-
-	sort.Sort(semver.Collection(versions))
-	if len(versions) <= 0 {
+func GetLatestImageVersion(versions map[string]*semver.Version, imageName string) *semver.Version {
+	v := versions[imageName]
+	if v == nil {
 		startingVersion, _ := semver.NewVersion("0.0.0")
 		return startingVersion
 	}
 
-	return versions[len(versions)-1]
+	return v
 }
 
 func GetLatestVersions() (map[string]*semver.Version, error) {
-	listTagsCmd := exec.Command("git", "tag", "--list")
-	listTagsCmd.Dir = config.RootDir
-	fmt.Println("Obtaining image latest versions from git tags")
-	out, err := listTagsCmd.Output()
+	// we could use faster local tags to check the versions but checking the remote ones is safer in terms of version conflicts
+	start := time.Now()
+	listRemoteTagsCmd := exec.Command("git", "ls-remote", "--tags", "origin")
+	listRemoteTagsCmd.Dir = config.RootDir
+	fmt.Println("Obtaining image latest versions from git remote tags")
+	out, err := listRemoteTagsCmd.Output()
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +51,19 @@ func GetLatestVersions() (map[string]*semver.Version, error) {
 	versions := make(map[string]*semver.Version, 0)
 	scanner := bufio.NewScanner(bytes.NewReader(out))
 	for scanner.Scan() {
-		tag := scanner.Text()
-		lineParts := strings.Split(tag, "@")
-		if len(lineParts) != 2 {
+		refLine := scanner.Text()
+		lineParts := strings.Split(refLine, "/")
+		tag := lineParts[len(lineParts)-1]
+		tagParts := strings.Split(tag, "@")
+		if len(tagParts) != 2 {
 			fmt.Printf("Skipping version extraction for tag: %s\n", tag)
 			continue
 		}
-		imgName := lineParts[0]
-		ver, err := semver.NewVersion(lineParts[1])
+
+		imgName := tagParts[0]
+		version := tagParts[1]
+
+		ver, err := semver.NewVersion(version)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing version: %s for tag: %s", err, tag)
 		}
@@ -89,6 +76,7 @@ func GetLatestVersions() (map[string]*semver.Version, error) {
 			}
 		}
 	}
+	commons.Debugf("Checking remote tags took: %v", time.Since(start))
 
 	return versions, nil
 }

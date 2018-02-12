@@ -15,7 +15,7 @@ type dockerImageParser struct{}
 
 func (dip *dockerImageParser) ExtractDockerFileDir(dockerfile string) (string, error) {
 	dockerfile, err := filepath.Abs(dockerfile)
-	commons.Debugf("Resolved dockerfile path to %s\n", dockerfile)
+	commons.Debugf("Resolved dockerfile path to %s", dockerfile)
 	if err != nil {
 		return "", err
 	}
@@ -39,7 +39,7 @@ func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerIma
 	if err != nil {
 		return nil, err
 	}
-	commons.Debugf("Resolved image name %s, dir: %s\n", imageName, dockerfileDir)
+	commons.Debugf("Resolved image name %s, dir: %s", imageName, dockerfileDir)
 	inFile, err := os.Open(dockerfilePath)
 	defer inFile.Close()
 

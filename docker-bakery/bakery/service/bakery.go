@@ -9,7 +9,12 @@ import (
 	"strings"
 	"text/template"
 
+	"os/signal"
+	"syscall"
+
+	"github.com/Masterminds/semver"
 	"github.com/smartrecruiters/go-tools/commons"
+	"github.com/smartrecruiters/go-tools/commons/tui"
 )
 
 const (
@@ -22,6 +27,7 @@ var dependencies map[string][]*DockerImage
 var errors = make([]error, 0)
 var commandResults = make([]*CommandResult, 0)
 var dockerImgParser = NewDockerImageParser()
+var versions map[string]*semver.Version
 
 // Called before execution of other commands, parses config and gathers docker image dependencies/hierarchy
 func InitConfiguration(configFile, rootDir string) error {
@@ -45,7 +51,7 @@ func InitConfiguration(configFile, rootDir string) error {
 		config.RootDir = rootDir
 	}
 
-	versions, err := GetLatestVersions()
+	versions, err = GetLatestVersions()
 	if err != nil {
 		return err
 	}
@@ -55,7 +61,7 @@ func InitConfiguration(configFile, rootDir string) error {
 	// this is especially useful when for the first time new child image is about to be build (without being triggered by a parent build)
 	// and there is no PARENT_VERSION property defined in the config file
 	// in such case it will be determined dynamically from the git tags and and may be used in the child Dockerfile.template
-	config.UpdateImageVersions(versions)
+	config.UpdateVersionProperties(versions)
 
 	hierarchy := NewDockerHierarchy()
 	err = hierarchy.AnalyzeStructure(config.RootDir, versions)
@@ -100,39 +106,56 @@ func FillTemplate(inputFile, outputFile string) error {
 }
 
 func BuildDockerfile(dockerfile, scope string, shouldTriggerDependantBuilds bool) error {
+	defer PrintReport()
+	setupInterruptionSignalHandler()
 	err := ExecuteDockerCommand(config.Commands.DefaultBuildCommand, dockerfile, scope, nil, shouldTriggerDependantBuilds)
-	if err == nil {
-		printReport()
+	if err != nil {
+		storeError(fmt.Errorf("error processing %s: %s", dockerfile, err))
 	}
-
 	return err
 }
 
 func PushDockerImages(dockerfile, scope string, shouldTriggerDependantBuilds bool) error {
+	defer PrintReport()
+	setupInterruptionSignalHandler()
 	err := ExecuteDockerCommand(config.Commands.DefaultPushCommand, dockerfile, scope, NewPostPushListener(), shouldTriggerDependantBuilds)
-	if err == nil {
+	if err != nil {
+		storeError(fmt.Errorf("error processing %s: %s", dockerfile, err))
+	} else {
 		err = PushTags()
-		if err != nil {
-			return err
-		}
-		printReport()
 	}
-
 	return err
 }
 
-func printReport() {
+func PrintReport() {
 	fmt.Printf(outputSeparator)
 	fmt.Printf("Processed %d image(s):\n", len(commandResults))
 	for _, r := range commandResults {
-		fmt.Printf("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion)
+		fmt.Printf(tui.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
 	}
-	if len(errors) > 0 {
-		fmt.Printf("Following (%d) errors occurred during image processing:\n", len(commandResults))
+	errorCount := len(errors)
+	if errorCount > 0 {
+		fmt.Printf(tui.RedString("Following (%d) errors occurred during image processing:\n", errorCount))
 		for _, err := range errors {
-			fmt.Printf("\t%s\n", err)
+			fmt.Printf(tui.RedString("\t%s\n", err))
 		}
 	}
+}
+
+func setupInterruptionSignalHandler() {
+	// setup signal receiving channel
+	signalReceiverChannel := make(chan os.Signal, 3)
+
+	// bind channel to handle signals
+	signal.Notify(signalReceiverChannel, os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+
+	// listen for channel notifications
+	go func() {
+		sig := <-signalReceiverChannel
+		commons.Debugf("Received signal: %s\n", sig.String())
+		PrintReport()
+		os.Exit(1)
+	}()
 }
 
 // Build/Push docker file in the following steps:
@@ -148,12 +171,13 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 	if err != nil {
 		return err
 	}
+
 	dockerfileDir, err := dockerImgParser.ExtractDockerFileDir(dockerfile)
 	if err != nil {
 		return err
 	}
 
-	latestVersion := GetLatestImageVersion(imgName)
+	latestVersion := GetLatestImageVersion(versions, imgName)
 	latestVersionStr := latestVersion.String()
 	nextVersion := GetNextVersion(latestVersion, scope)
 	nextVersionStr := nextVersion.String()
@@ -163,7 +187,9 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 	// since now we know the image name and the next version so we can
 	// update config properties so that commands and dockerfile template could be properly filled
 	config.UpdateDynamicProperties(imgName, nextVersionStr, dockerfileDir)
-	config.PrintProperties()
+	if config.Verbose {
+		config.PrintProperties()
+	}
 
 	outputPath := fmt.Sprintf("%s/Dockerfile", dockerfileDir)
 	err = FillTemplate(dockerfile, outputPath)
@@ -217,9 +243,7 @@ func executeCommand(command string) error {
 	dockerCmd.Stdout = os.Stdout
 	dockerCmd.Stderr = os.Stderr
 
-	err = dockerCmd.Run()
-
-	return err
+	return dockerCmd.Run()
 }
 
 func storeResult(imgName string, latestVersionStr string, nextVersionStr string) *CommandResult {

@@ -10,6 +10,7 @@ type Config struct {
 	Properties        map[string]string `json:"properties"`
 	Commands          Commands          `json:"commands"`
 	RootDir           string            `json:"rootDir"`
+	Verbose           bool              `json:"verbose"`
 	AutoBuildExcludes []string          `json:"autoBuildExcludes"`
 }
 

@@ -33,7 +33,7 @@ func (cfg *Config) UpdateDynamicProperties(imgName, nextVersion, dockerfileDir s
 	cfg.setImageVersionProperty(imgName, nextVersion)
 }
 
-func (cfg *Config) UpdateImageVersions(versions map[string]*semver.Version) {
+func (cfg *Config) UpdateVersionProperties(versions map[string]*semver.Version) {
 	for image, version := range versions {
 		cfg.setImageVersionProperty(image, version.String())
 	}
