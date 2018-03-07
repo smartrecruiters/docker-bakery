@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/smartrecruiters/go-tools/docker-bakery/bakery/service"
+	"github.com/smartrecruiters/docker-bakery/bakery/service"
 	"github.com/urfave/cli"
 )
 

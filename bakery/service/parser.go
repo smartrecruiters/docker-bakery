@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/smartrecruiters/go-tools/commons"
+	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
 type dockerImageParser struct{}

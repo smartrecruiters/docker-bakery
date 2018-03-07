@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/semver"
-	"github.com/smartrecruiters/go-tools/commons"
+	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
 type postPushListener struct{}

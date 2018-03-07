@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
-	"github.com/smartrecruiters/go-tools/commons"
+	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
 // Reads configuration file from provided path and returns it as an object

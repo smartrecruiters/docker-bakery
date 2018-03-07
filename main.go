@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/smartrecruiters/go-tools/cli-commons"
-	"github.com/smartrecruiters/go-tools/docker-bakery/bakery"
-	"github.com/smartrecruiters/go-tools/version"
+	"github.com/smartrecruiters/docker-bakery/bakery"
+	cliCommons "github.com/smartrecruiters/docker-bakery/bakery/commons/cli"
+	"github.com/smartrecruiters/docker-bakery/bakery/commons/version"
 	"github.com/urfave/cli"
 )
 
@@ -20,6 +20,6 @@ func main() {
 	app.Usage = applicationDescription
 	app.Version = version.String()
 	app.Commands = bakery.GetCommands()
-	app.ExitErrHandler = cli_commons.CustomExitHandler
+	app.ExitErrHandler = cliCommons.CustomExitHandler
 	app.Run(os.Args)
 }

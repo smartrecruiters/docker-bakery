@@ -7,7 +7,7 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/disiqueira/gotree"
-	"github.com/smartrecruiters/go-tools/commons"
+	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
 func NewDockerHierarchy() DockerHierarchy {

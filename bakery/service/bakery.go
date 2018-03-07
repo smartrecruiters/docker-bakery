@@ -13,8 +13,8 @@ import (
 	"syscall"
 
 	"github.com/Masterminds/semver"
-	"github.com/smartrecruiters/go-tools/commons"
-	"github.com/smartrecruiters/go-tools/commons/tui"
+	"github.com/fatih/color"
+	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
 const (
@@ -131,13 +131,13 @@ func PrintReport() {
 	fmt.Printf(outputSeparator)
 	fmt.Printf("Processed %d image(s):\n", len(commandResults))
 	for _, r := range commandResults {
-		fmt.Printf(tui.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
+		fmt.Printf(color.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
 	}
 	errorCount := len(errors)
 	if errorCount > 0 {
-		fmt.Printf(tui.RedString("Following (%d) errors occurred during image processing:\n", errorCount))
+		fmt.Printf(color.RedString("Following (%d) errors occurred during image processing:\n", errorCount))
 		for _, err := range errors {
-			fmt.Printf(tui.RedString("\t%s\n", err))
+			fmt.Printf(color.RedString("\t%s\n", err))
 		}
 	}
 }
