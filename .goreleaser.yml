@@ -1,0 +1,9 @@
+# Build customization
+builds:
+  - binary: docker-bakery
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
