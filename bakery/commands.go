@@ -5,7 +5,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Returns CLI commands available in the docker-bakery tool
+// GetCommands returns CLI commands available in the docker-bakery tool
 func GetCommands() []cli.Command {
 	return []cli.Command{
 		{

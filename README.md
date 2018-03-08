@@ -1,4 +1,9 @@
-# docker-bakery
+<p align="center">
+	<h3>docker-bakery</h3>
+	<p align="center">	
+		<a href="https://goreportcard.com/report/github.com/smartrecruiters/docker-bakery"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/smartrecruiters/docker-bakery?style=flat-square"></a>
+	</p>
+</p>
 <!-- MarkdownTOC  depth="4" autolink="true" bracket="round" autoanchor="true" -->
 
 - [Purpose](#purpose)

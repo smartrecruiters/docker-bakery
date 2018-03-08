@@ -10,7 +10,7 @@ import (
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
-// Reads configuration file from provided path and returns it as an object.
+// ReadConfig reads configuration file from provided path and returns it as an object.
 func ReadConfig(configFile string) (*Config, error) {
 	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
@@ -25,7 +25,7 @@ func ReadConfig(configFile string) (*Config, error) {
 	return &cfg, nil
 }
 
-// Updates config object state with the corresponding values of all dynamic properties.
+// UpdateDynamicProperties updates config object state with the corresponding values of all dynamic properties.
 func (cfg *Config) UpdateDynamicProperties(imgName, nextVersion, dockerfileDir string) {
 	cfg.Properties["IMAGE_NAME"] = imgName
 	cfg.Properties["IMAGE_VERSION"] = nextVersion
@@ -33,7 +33,7 @@ func (cfg *Config) UpdateDynamicProperties(imgName, nextVersion, dockerfileDir s
 	cfg.setImageVersionProperty(imgName, nextVersion)
 }
 
-// Updates config with versions of the images.
+// UpdateVersionProperties updates config with versions of the images.
 func (cfg *Config) UpdateVersionProperties(versions map[string]*semver.Version) {
 	for image, version := range versions {
 		cfg.setImageVersionProperty(image, version.String())
@@ -54,7 +54,7 @@ func (cfg *Config) setImageVersionProperty(imgName, version string) {
 	cfg.Properties[propertyName] = version
 }
 
-// Prints all properties available in the config (along with the dynamic ones).
+// PrintProperties prints all properties available in the config (along with the dynamic ones).
 func (cfg *Config) PrintProperties() {
 	fmt.Println("Config properties:")
 	sortedKeys := commons.SortMapKeys(cfg.Properties)

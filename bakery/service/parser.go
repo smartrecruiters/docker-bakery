@@ -78,7 +78,7 @@ func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerIma
 	return nil, err
 }
 
-// Initialized new docker image parser.
+// NewDockerImageParser initializes new docker image parser.
 func NewDockerImageParser() DockerImageParser {
 	return &dockerImageParser{}
 }

@@ -17,17 +17,17 @@ import (
 // Implementation of the PostCommandListener.
 type postPushListener struct{}
 
-// Executes image tagging as the PostCommand action.
+// OnPostCommand executes image tagging as the PostCommand action.
 func (pcl *postPushListener) OnPostCommand(result *CommandResult) {
 	TagVersion(result.Name, result.NextVersion)
 }
 
-// Initialized new PostPushListener.
+// NewPostPushListener initializes new PostPushListener.
 func NewPostPushListener() PostCommandListener {
 	return &postPushListener{}
 }
 
-// Returns latest semantic version for the given image name available in the provided directory
+// GetLatestImageVersion returns latest semantic version for the given image name available in the provided directory
 // Version is determined based on the last git tag available for that image name
 // In case no previous tags has been found the 0.0.0 is returned
 func GetLatestImageVersion(versions map[string]*semver.Version, imageName string) *semver.Version {
@@ -40,7 +40,7 @@ func GetLatestImageVersion(versions map[string]*semver.Version, imageName string
 	return v
 }
 
-// Returns map with latest versions of the images based on git remote tags.
+// GetLatestVersions returns map with latest versions of the images based on git remote tags.
 // Image name is the key and latest version is the value.
 func GetLatestVersions() (map[string]*semver.Version, error) {
 	// we could use faster local tags to check the versions but checking the remote ones is safer in terms of version conflicts
@@ -86,7 +86,7 @@ func GetLatestVersions() (map[string]*semver.Version, error) {
 	return versions, nil
 }
 
-// Pushes git tags to the remote.
+// PushTags pushes git tags to the remote.
 func PushTags() error {
 	pushTagsCmd := exec.Command("git", "push", "--tags")
 	pushTagsCmd.Dir = config.RootDir
@@ -97,7 +97,7 @@ func PushTags() error {
 	return pushTagsCmd.Run()
 }
 
-// Creates new tag for the image with the given version.
+// TagVersion creates new tag for the image with the given version.
 func TagVersion(imageName, version string) error {
 	tagCmd := exec.Command("git", "tag", fmt.Sprintf("%s@%s", imageName, version))
 	tagCmd.Dir = config.RootDir
@@ -108,7 +108,7 @@ func TagVersion(imageName, version string) error {
 	return tagCmd.Run()
 }
 
-// Returns the next semantic version according to the scope (major/minor/patch)
+// GetNextVersion returns the next semantic version according to the scope (major/minor/patch)
 func GetNextVersion(version *semver.Version, scope string) semver.Version {
 	switch scope {
 	case "major":

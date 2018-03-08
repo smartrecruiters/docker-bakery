@@ -29,7 +29,7 @@ var commandResults = make([]*CommandResult, 0)
 var dockerImgParser = NewDockerImageParser()
 var versions map[string]*semver.Version
 
-// Called before execution of other commands, parses config and gathers docker image dependencies/hierarchy
+// InitConfiguration is called before execution of other commands, parses config and gathers docker image dependencies/hierarchy
 func InitConfiguration(configFile, rootDir string) error {
 	var err error
 	if configFile == "" {
@@ -76,7 +76,7 @@ func InitConfiguration(configFile, rootDir string) error {
 	return nil
 }
 
-// Takes the input Dockerfile.template and fills it to deliver Dockerfile that will be used to build the image.
+// FillTemplate takes the input Dockerfile.template and fills it to deliver Dockerfile that will be used to build the image.
 // Uses properties defined in the config file + dynamic properties for filling the template.
 // Dynamic properties are prepared automatically after analysing entire image hierarchy.
 func FillTemplate(inputFile, outputFile string) error {
@@ -108,7 +108,7 @@ func FillTemplate(inputFile, outputFile string) error {
 	return commons.FillTemplate(inputFile, outputFile, config.Properties)
 }
 
-// Uses build command defined in the config to build provided dockerfile and potentially its dependants.
+// BuildDockerfile uses build command defined in the config to build provided dockerfile and potentially its dependants.
 // Prints the build report at the end of processing.
 func BuildDockerfile(dockerfile, scope string, shouldTriggerDependantBuilds bool) error {
 	defer PrintReport()
@@ -120,7 +120,7 @@ func BuildDockerfile(dockerfile, scope string, shouldTriggerDependantBuilds bool
 	return err
 }
 
-// Uses push command defined in the config to build provided dockerfile and potentially its dependants.
+// PushDockerImages uses push command defined in the config to build provided dockerfile and potentially its dependants.
 // Prints the build report at the end of processing.
 func PushDockerImages(dockerfile, scope string, shouldTriggerDependantBuilds bool) error {
 	defer PrintReport()
@@ -134,7 +134,7 @@ func PushDockerImages(dockerfile, scope string, shouldTriggerDependantBuilds boo
 	return err
 }
 
-// Prints the report with processed images and its versions.
+// PrintReport prints the report with processed images and its versions.
 func PrintReport() {
 	fmt.Printf(outputSeparator)
 	fmt.Printf("Processed %d image(s):\n", len(commandResults))
@@ -168,7 +168,7 @@ func setupInterruptionSignalHandler() {
 	}()
 }
 
-// Build/Push docker file in the following steps:
+// ExecuteDockerCommand build/push docker file in the following steps:
 // - obtain current image info (name, version, dependants)
 // - get next version based on git tags according to the change scope
 // - updates dynamic config properties based on gathered info

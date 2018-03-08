@@ -3,9 +3,9 @@ VERSION=1.0.5
 
 .DEFAULT_GOAL: all
 
-.PHONY: all test build fmt install
+.PHONY: all test build fmt install lint install-lint
 
-all: install fmt build test
+all: install fmt build test lint
 
 install:
 	@echo "Installing dependencies"
@@ -14,6 +14,14 @@ install:
 fmt:
 	@echo "Formating source code"
 	goimports -l -w .
+
+install-lint:
+	@echo "Installing golinter"
+	go get -u golang.org/x/lint/golint
+
+lint:
+	@echo "Executing golint"
+	golint bakery/...
 
 test:
 	@echo "Running tests"
