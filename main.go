@@ -1,3 +1,4 @@
+// Package main is for initializing CLI application
 package main
 
 import (

@@ -1,3 +1,4 @@
+// Package commands gathers commands exposed in the CLI docker-bakery interface
 package commands
 
 import (

@@ -1,3 +1,4 @@
+// Package bakery exposes commands available for CLI usage and binds them to internal services
 package bakery
 
 import (

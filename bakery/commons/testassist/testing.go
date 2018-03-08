@@ -1,3 +1,4 @@
+// Package testassist holds testing helpers
 package testassist
 
 import "testing"

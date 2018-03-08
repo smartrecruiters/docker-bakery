@@ -1,3 +1,4 @@
+// Package cli is for common CLI utilities
 package cli
 
 import (
