@@ -76,6 +76,9 @@ func InitConfiguration(configFile, rootDir string) error {
 	return nil
 }
 
+// Takes the input Dockerfile.template and fills it to deliver Dockerfile that will be used to build the image.
+// Uses properties defined in the config file + dynamic properties for filling the template.
+// Dynamic properties are prepared automatically after analysing entire image hierarchy.
 func FillTemplate(inputFile, outputFile string) error {
 	if _, err := os.Stat(inputFile); os.IsNotExist(err) {
 		if strings.HasSuffix(inputFile, ".template") {
@@ -105,6 +108,8 @@ func FillTemplate(inputFile, outputFile string) error {
 	return commons.FillTemplate(inputFile, outputFile, config.Properties)
 }
 
+// Uses build command defined in the config to build provided dockerfile and potentially its dependants.
+// Prints the build report at the end of processing.
 func BuildDockerfile(dockerfile, scope string, shouldTriggerDependantBuilds bool) error {
 	defer PrintReport()
 	setupInterruptionSignalHandler()
@@ -115,6 +120,8 @@ func BuildDockerfile(dockerfile, scope string, shouldTriggerDependantBuilds bool
 	return err
 }
 
+// Uses push command defined in the config to build provided dockerfile and potentially its dependants.
+// Prints the build report at the end of processing.
 func PushDockerImages(dockerfile, scope string, shouldTriggerDependantBuilds bool) error {
 	defer PrintReport()
 	setupInterruptionSignalHandler()
@@ -127,6 +134,7 @@ func PushDockerImages(dockerfile, scope string, shouldTriggerDependantBuilds boo
 	return err
 }
 
+// Prints the report with processed images and its versions.
 func PrintReport() {
 	fmt.Printf(outputSeparator)
 	fmt.Printf("Processed %d image(s):\n", len(commandResults))
@@ -142,6 +150,8 @@ func PrintReport() {
 	}
 }
 
+// Setups interruption signal handler, that allows for printing the summary report even in cases when
+// processing was aborted.
 func setupInterruptionSignalHandler() {
 	// setup signal receiving channel
 	signalReceiverChannel := make(chan os.Signal, 3)
@@ -227,6 +237,7 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 	return nil
 }
 
+// Executes command and prints to the stdout its output.
 func executeCommand(command string) error {
 	t, err := template.New("dockerCmd").Parse(command)
 	var cmdBuf bytes.Buffer
@@ -246,6 +257,7 @@ func executeCommand(command string) error {
 	return dockerCmd.Run()
 }
 
+// Stores the result of successful command processing. Receives image name and its current and next versions.
 func storeResult(imgName string, latestVersionStr string, nextVersionStr string) *CommandResult {
 	result := &CommandResult{
 		Name:           imgName,
@@ -257,6 +269,7 @@ func storeResult(imgName string, latestVersionStr string, nextVersionStr string)
 	return result
 }
 
+// Stores the error of command processing.
 func storeError(err error) {
 	errors = append(errors, err)
 }

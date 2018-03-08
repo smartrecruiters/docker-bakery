@@ -10,7 +10,7 @@ import (
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
-// Reads configuration file from provided path and returns it as an object
+// Reads configuration file from provided path and returns it as an object.
 func ReadConfig(configFile string) (*Config, error) {
 	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
@@ -25,7 +25,7 @@ func ReadConfig(configFile string) (*Config, error) {
 	return &cfg, nil
 }
 
-// Updates config object state with the corresponding values of dynamic properties
+// Updates config object state with the corresponding values of all dynamic properties.
 func (cfg *Config) UpdateDynamicProperties(imgName, nextVersion, dockerfileDir string) {
 	cfg.Properties["IMAGE_NAME"] = imgName
 	cfg.Properties["IMAGE_VERSION"] = nextVersion
@@ -33,12 +33,18 @@ func (cfg *Config) UpdateDynamicProperties(imgName, nextVersion, dockerfileDir s
 	cfg.setImageVersionProperty(imgName, nextVersion)
 }
 
+// Updates config with versions of the images.
 func (cfg *Config) UpdateVersionProperties(versions map[string]*semver.Version) {
 	for image, version := range versions {
 		cfg.setImageVersionProperty(image, version.String())
 	}
 }
 
+// Sets the dynamic version property for the image and updates the config with it.
+// Version property follows the convention comparing to the image name:
+// - it is in uppercase
+// - has `-` and `.` replaced with `_`
+// - has the `_VERSION` suffix
 func (cfg *Config) setImageVersionProperty(imgName, version string) {
 	imgNameInTmpl := strings.ToUpper(imgName)
 	imgNameInTmpl = strings.Replace(imgNameInTmpl, "-", "_", -1)
@@ -48,6 +54,7 @@ func (cfg *Config) setImageVersionProperty(imgName, version string) {
 	cfg.Properties[propertyName] = version
 }
 
+// Prints all properties available in the config (along with the dynamic ones).
 func (cfg *Config) PrintProperties() {
 	fmt.Println("Config properties:")
 	sortedKeys := commons.SortMapKeys(cfg.Properties)

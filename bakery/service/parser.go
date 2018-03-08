@@ -11,8 +11,10 @@ import (
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
+// Type holding image parser functionality.
 type dockerImageParser struct{}
 
+// Extracts directory name of the provided dockerfile.
 func (dip *dockerImageParser) ExtractDockerFileDir(dockerfile string) (string, error) {
 	dockerfile, err := filepath.Abs(dockerfile)
 	commons.Debugf("Resolved dockerfile path to %s", dockerfile)
@@ -22,6 +24,7 @@ func (dip *dockerImageParser) ExtractDockerFileDir(dockerfile string) (string, e
 	return path.Dir(dockerfile), nil
 }
 
+// Extracts name of the dockerfile based on its parent dir.
 func (dip *dockerImageParser) ExtractImageName(dockerfile string) (string, error) {
 	dir, err := dip.ExtractDockerFileDir(dockerfile)
 	if err != nil {
@@ -30,6 +33,8 @@ func (dip *dockerImageParser) ExtractImageName(dockerfile string) (string, error
 	return path.Base(dir), nil
 }
 
+// Parses dockerfile and return the object describing it.
+// Apart from image name and location the parent information is extracted based on the `FROM` clause.
 func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerImage, error) {
 	dockerfileDir, err := dip.ExtractDockerFileDir(dockerfilePath)
 	if err != nil {
@@ -73,6 +78,7 @@ func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerIma
 	return nil, err
 }
 
+// Initialized new docker image parser.
 func NewDockerImageParser() DockerImageParser {
 	return &dockerImageParser{}
 }

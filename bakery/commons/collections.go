@@ -12,10 +12,12 @@ func Index(vs []string, t string) int {
 	return -1
 }
 
+// Removes last element from the slice and returns the altered slice.
 func RemoveLast(s []string) []string {
 	return RemoveIndex(s, len(s)-1)
 }
 
+// Removes the element from the slice by its index.
 func RemoveIndex(s []string, index int) []string {
 	return append(s[:index], s[index+1:]...)
 }
@@ -70,6 +72,7 @@ func Map(vs []string, f func(string) string) []string {
 	return vsm
 }
 
+// Sorts keys of the map of interfaces and returns them in the slice.
 func SortKeys(m map[string]interface{}) []string {
 	i, sorted := 0, make([]string, len(m))
 	for k := range m {
@@ -80,6 +83,7 @@ func SortKeys(m map[string]interface{}) []string {
 	return sorted
 }
 
+// Sorts keys of the map of strings and returns them in the slice.
 func SortMapKeys(m map[string]string) []string {
 	i, sorted := 0, make([]string, len(m))
 	for k := range m {

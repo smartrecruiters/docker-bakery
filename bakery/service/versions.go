@@ -14,12 +14,15 @@ import (
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
+// Implementation of the PostCommandListener.
 type postPushListener struct{}
 
+// Executes image tagging as the PostCommand action.
 func (pcl *postPushListener) OnPostCommand(result *CommandResult) {
 	TagVersion(result.Name, result.NextVersion)
 }
 
+// Initialized new PostPushListener.
 func NewPostPushListener() PostCommandListener {
 	return &postPushListener{}
 }
@@ -37,6 +40,8 @@ func GetLatestImageVersion(versions map[string]*semver.Version, imageName string
 	return v
 }
 
+// Returns map with latest versions of the images based on git remote tags.
+// Image name is the key and latest version is the value.
 func GetLatestVersions() (map[string]*semver.Version, error) {
 	// we could use faster local tags to check the versions but checking the remote ones is safer in terms of version conflicts
 	start := time.Now()
@@ -81,6 +86,7 @@ func GetLatestVersions() (map[string]*semver.Version, error) {
 	return versions, nil
 }
 
+// Pushes git tags to the remote.
 func PushTags() error {
 	pushTagsCmd := exec.Command("git", "push", "--tags")
 	pushTagsCmd.Dir = config.RootDir
@@ -91,6 +97,7 @@ func PushTags() error {
 	return pushTagsCmd.Run()
 }
 
+// Creates new tag for the image with the given version.
 func TagVersion(imageName, version string) error {
 	tagCmd := exec.Command("git", "tag", fmt.Sprintf("%s@%s", imageName, version))
 	tagCmd.Dir = config.RootDir
