@@ -55,21 +55,26 @@ func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerIma
 			return nil, fmt.Errorf("unable to extract dependency from %s file. Check if first line starts with `FROM `", dockerfilePath)
 		}
 
-		dependsFromLong := strings.TrimPrefix(line, dependencyPrefix)
-		dependsFromShort := dependsFromLong
-		parts := strings.Split(dependsFromLong, "/")
+		dependsOnLong := strings.TrimPrefix(line, dependencyPrefix)
+		dependsOnShort := dependsOnLong
+		dependsOnVersion := ""
+		parts := strings.Split(dependsOnLong, "/")
 		if len(parts) <= 0 {
 			fmt.Printf("WARN: Unable to determine short base image name for: %s", dockerfilePath)
 		} else {
 			imgNameWithVersion := parts[len(parts)-1]
 			imgNameWithVersionParts := strings.Split(imgNameWithVersion, ":")
-			dependsFromShort = imgNameWithVersionParts[0]
+			dependsOnShort = imgNameWithVersionParts[0]
+			if len(imgNameWithVersionParts) > 1 {
+				dependsOnVersion = imgNameWithVersionParts[1]
+			}
 		}
 
 		return &DockerImage{
 			Name:             imageName,
-			DependsFromLong:  dependsFromLong,
-			DependsFromShort: dependsFromShort,
+			DependsOnLong:    dependsOnLong,
+			DependsOnShort:   dependsOnShort,
+			DependsOnVersion: dependsOnVersion,
 			DockerfileDir:    dockerfileDir,
 			DockerfilePath:   dockerfilePath}, nil
 	}

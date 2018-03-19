@@ -12,10 +12,12 @@ import (
 
 // NewDockerHierarchy initializes new docker hierarchy.
 func NewDockerHierarchy() DockerHierarchy {
-	return &dockerHierarchy{imagesWithDependantsMap: make(map[string][]*DockerImage),
-		analyzedImagesFlatMap:             make(map[string]*DockerTreeItem),
-		analyzedImagesSlice:               make([]*DockerTreeItem, 0),
-		analyzedImagesPlusExternalParents: make([]*DockerTreeItem, 0)}
+	return &dockerHierarchy{
+		images:                        make(map[string]*DockerImage),
+		imagesWithDependantsMap:       make(map[string][]*DockerImage),
+		imagesTree:                    make(map[string]*DockerTreeItem),
+		imagesTreeSlice:               make([]*DockerTreeItem, 0),
+		imagesTreePlusExternalParents: make([]*DockerTreeItem, 0)}
 }
 
 // Implementation of the DockerHierarchy interface
@@ -23,11 +25,17 @@ type dockerHierarchy struct {
 	// map where image name is a key, value is the slice of dependant images
 	imagesWithDependantsMap map[string][]*DockerImage
 	// map with all analyzed images where key is the image name, value is the corresponding DockerTreeItem object
-	analyzedImagesFlatMap map[string]*DockerTreeItem
+	imagesTree map[string]*DockerTreeItem
+	// map with all analyzed images where key is the image name, value is the corresponding DockerImage object
+	images map[string]*DockerImage
 	// slice with analyzed DockerTreeItem objects
-	analyzedImagesSlice []*DockerTreeItem
+	imagesTreeSlice []*DockerTreeItem
 	// slice with analyzed DockerTreeItem objects + the external parents that were not directly analyzed but should be present in the tree structure
-	analyzedImagesPlusExternalParents []*DockerTreeItem
+	imagesTreePlusExternalParents []*DockerTreeItem
+}
+
+func (h *dockerHierarchy) GetImageByName(imageName string) *DockerImage {
+	return h.images[imageName]
 }
 
 // Analyzes the structure of the directory and effectively builds the entire hierarchy.
@@ -46,7 +54,9 @@ func (h *dockerHierarchy) AnalyzeStructure(rootDir string, latestVersions map[st
 				return err
 			}
 			if dockerImg != nil {
-				h.AddImage(dockerImg, latestVersions[dockerImg.Name])
+				dockerImg.latestVersion = latestVersions[dockerImg.Name]
+				commons.Debugf("Adding image to hierarchy: %+v", dockerImg)
+				h.AddImage(dockerImg)
 			}
 		}
 
@@ -60,18 +70,19 @@ func (h *dockerHierarchy) AnalyzeStructure(rootDir string, latestVersions map[st
 // Adds image to the hierarchy, uses latest version information to include it in the hierarchy view.
 // Used during analyzing process.
 // Updates internal hierarchy structures.
-func (h *dockerHierarchy) AddImage(dockerImg *DockerImage, latestVersion *semver.Version) {
-	if _, exists := h.imagesWithDependantsMap[dockerImg.DependsFromShort]; !exists {
-		h.imagesWithDependantsMap[dockerImg.DependsFromShort] = make([]*DockerImage, 0)
+func (h *dockerHierarchy) AddImage(dockerImg *DockerImage) {
+	if _, exists := h.imagesWithDependantsMap[dockerImg.DependsOnShort]; !exists {
+		h.imagesWithDependantsMap[dockerImg.DependsOnShort] = make([]*DockerImage, 0)
 	}
-	h.imagesWithDependantsMap[dockerImg.DependsFromShort] = append(h.imagesWithDependantsMap[dockerImg.DependsFromShort], dockerImg)
+	h.imagesWithDependantsMap[dockerImg.DependsOnShort] = append(h.imagesWithDependantsMap[dockerImg.DependsOnShort], dockerImg)
 
-	item := h.buildDockerTreeItem(dockerImg, latestVersion)
+	item := h.buildDockerTreeItem(dockerImg)
 	commons.Debugf("Processing %+v", item)
 
-	h.analyzedImagesSlice = append(h.analyzedImagesSlice, item)
-	h.analyzedImagesFlatMap[dockerImg.Name] = item
-	h.analyzedImagesPlusExternalParents = append(h.analyzedImagesPlusExternalParents, item)
+	h.imagesTreeSlice = append(h.imagesTreeSlice, item)
+	h.imagesTree[dockerImg.Name] = item
+	h.images[dockerImg.Name] = dockerImg
+	h.imagesTreePlusExternalParents = append(h.imagesTreePlusExternalParents, item)
 }
 
 // Return the map of docker images where key is the image name and value is the slice of its dependant images.
@@ -81,17 +92,17 @@ func (h *dockerHierarchy) GetImagesWithDependants() map[string][]*DockerImage {
 
 // Creates the first level of the hierarchy tree. External images are qualified as first level parents.
 func (h *dockerHierarchy) createFirstLevelRoots() {
-	for _, i := range h.analyzedImagesSlice {
+	for _, i := range h.imagesTreeSlice {
 		if h.isExternalParent(i.ParentID) {
-			if _, exists := h.analyzedImagesFlatMap[i.ParentID]; !exists {
-				h.analyzedImagesFlatMap[i.ParentID] = &DockerTreeItem{
+			if _, exists := h.imagesTree[i.ParentID]; !exists {
+				h.imagesTree[i.ParentID] = &DockerTreeItem{
 					ID:       i.ParentID,
 					ParentID: "",
 					TreeItem: &gotree.GTStructure{
 						Name:  i.ParentID,
 						Items: make([]*gotree.GTStructure, 0)}}
 
-				h.analyzedImagesPlusExternalParents = append(h.analyzedImagesPlusExternalParents, h.analyzedImagesFlatMap[i.ParentID])
+				h.imagesTreePlusExternalParents = append(h.imagesTreePlusExternalParents, h.imagesTree[i.ParentID])
 			}
 		}
 	}
@@ -100,7 +111,7 @@ func (h *dockerHierarchy) createFirstLevelRoots() {
 // Checks whenever image is an external parent.
 // External parent is an image that appears in the hierarchy only in the `FROM` clause but it is not defined among the hierarchy itself.
 func (h *dockerHierarchy) isExternalParent(parentID string) bool {
-	for _, i := range h.analyzedImagesSlice {
+	for _, i := range h.imagesTreeSlice {
 		if i.ID == parentID {
 			return false
 		}
@@ -109,14 +120,14 @@ func (h *dockerHierarchy) isExternalParent(parentID string) bool {
 }
 
 // Builds an object representing image in the tree view.
-func (h *dockerHierarchy) buildDockerTreeItem(dockerImg *DockerImage, latestVersion *semver.Version) *DockerTreeItem {
+func (h *dockerHierarchy) buildDockerTreeItem(dockerImg *DockerImage) *DockerTreeItem {
 	name := dockerImg.Name
-	if latestVersion != nil {
-		name = fmt.Sprintf("%s (latest: %s)", dockerImg.Name, latestVersion.String())
+	if dockerImg.latestVersion != nil {
+		name = fmt.Sprintf("%s (latest: %s)", dockerImg.Name, dockerImg.latestVersion.String())
 	}
 	return &DockerTreeItem{
 		ID:       dockerImg.Name,
-		ParentID: dockerImg.DependsFromShort,
+		ParentID: dockerImg.DependsOnShort,
 		TreeItem: &gotree.GTStructure{
 			Name:  name,
 			Items: make([]*gotree.GTStructure, 0)}}
@@ -124,10 +135,10 @@ func (h *dockerHierarchy) buildDockerTreeItem(dockerImg *DockerImage, latestVers
 
 // Build tree view of the hierarchy.
 func (h *dockerHierarchy) buildTree(root *gotree.GTStructure) {
-	for _, i := range h.analyzedImagesPlusExternalParents {
+	for _, i := range h.imagesTreePlusExternalParents {
 		// if item has a parent append it to the children of that parent
 		if i.ParentID != "" {
-			myParent := h.analyzedImagesFlatMap[i.ParentID]
+			myParent := h.imagesTree[i.ParentID]
 			myParent.TreeItem.Items = append(myParent.TreeItem.Items, i.TreeItem)
 		} else {
 			// otherwise it will be treated as a root item
