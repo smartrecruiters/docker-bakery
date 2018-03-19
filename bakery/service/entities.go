@@ -25,8 +25,11 @@ type DockerImage struct {
 	Name             string
 	DockerfileDir    string
 	DockerfilePath   string
-	DependsFromLong  string
-	DependsFromShort string
+	DependsOnLong    string
+	DependsOnShort   string
+	DependsOnVersion string
+	nextVersion      semver.Version
+	latestVersion    *semver.Version
 }
 
 // PostCommandListener is an interface that allows to plugin just after docker command is executed and before any commands on children are executed
@@ -61,7 +64,9 @@ type DockerHierarchy interface {
 	// Analyzes docker files structure under given directory and constructs entire hierarchy
 	AnalyzeStructure(string, map[string]*semver.Version) error
 	// Adds docker image to the hierarchy based on the docker image parent
-	AddImage(dockerImg *DockerImage, latestVersion *semver.Version)
+	AddImage(dockerImg *DockerImage)
+	// GetImageByName returns docker image by its name. Image can be obtained after entire hierarchy has been analyzed
+	GetImageByName(imageName string) *DockerImage
 	// Returns map with docker images where key is the short docker image name and
 	// the value is a slice of dependent images
 	GetImagesWithDependants() map[string][]*DockerImage

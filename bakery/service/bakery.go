@@ -18,16 +18,18 @@ import (
 )
 
 const (
-	dependencyPrefix = "FROM "
-	outputSeparator  = "====================================================================\n"
+	unableToDetermine = "unable-to-determine"
+	dependencyPrefix  = "FROM "
+	outputSeparator   = "====================================================================\n"
 )
 
 var config *Config
 var dependencies map[string][]*DockerImage
-var errors = make([]error, 0)
+var commandErrors = make([]error, 0)
 var commandResults = make([]*CommandResult, 0)
 var dockerImgParser = NewDockerImageParser()
 var versions map[string]*semver.Version
+var hierarchy = NewDockerHierarchy()
 
 // InitConfiguration is called before execution of other commands, parses config and gathers docker image dependencies/hierarchy
 func InitConfiguration(configFile, rootDir string) error {
@@ -56,14 +58,8 @@ func InitConfiguration(configFile, rootDir string) error {
 		return err
 	}
 
-	// update config properties with the latest versions of available images
-	// versions are determined from the git tags
-	// this is especially useful when for the first time new child image is about to be build (without being triggered by a parent build)
-	// and there is no PARENT_VERSION property defined in the config file
-	// in such case it will be determined dynamically from the git tags and and may be used in the child Dockerfile.template
-	config.UpdateVersionProperties(versions)
+	updateConfigProperties()
 
-	hierarchy := NewDockerHierarchy()
 	err = hierarchy.AnalyzeStructure(config.RootDir, versions)
 	if err != nil {
 		return err
@@ -74,6 +70,38 @@ func InitConfiguration(configFile, rootDir string) error {
 	dependencies = hierarchy.GetImagesWithDependants()
 
 	return nil
+}
+
+func updateConfigProperties() {
+	// update config properties with the latest versions of available images
+	// versions are determined from the git tags
+	// this is especially useful when for the first time new child image is about to be build (without being triggered by a parent build)
+	// and there is no PARENT_VERSION property defined in the config file
+	// in such case it will be determined dynamically from the git tags and and may be used in the child Dockerfile.template
+	config.UpdateVersionProperties(versions)
+
+	// update the rest of config properties that stays the same for the duration of docker-bakery execution
+	name := getValue(GetGitUserName)
+	email := getValue(GetGitUserEmail)
+	host := getValue(os.Hostname)
+
+	config.setBuilderName(name)
+	config.setBuilderEmail(email)
+	config.setBuilderHost(host)
+}
+
+// valueGetterFn represents no-arg function that returns a string and possibly an error
+type valueGetterFn func() (string, error)
+
+// getValue function is a small helper that obtains value from provided valueGetterFn function and
+// encapsulates common error handling
+func getValue(propertyGetter valueGetterFn) string {
+	value, err := propertyGetter()
+	if err != nil {
+		value = unableToDetermine
+		commons.Debugf("unable to determine value err: %s", err)
+	}
+	return value
 }
 
 // FillTemplate takes the input Dockerfile.template and fills it to deliver Dockerfile that will be used to build the image.
@@ -141,10 +169,10 @@ func PrintReport() {
 	for _, r := range commandResults {
 		fmt.Printf(color.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
 	}
-	errorCount := len(errors)
+	errorCount := len(commandErrors)
 	if errorCount > 0 {
 		fmt.Printf(color.RedString("Following (%d) errors occurred during image processing:\n", errorCount))
-		for _, err := range errors {
+		for _, err := range commandErrors {
 			fmt.Printf(color.RedString("\t%s\n", err))
 		}
 	}
@@ -181,27 +209,22 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 	if err != nil {
 		return err
 	}
-
-	dockerfileDir, err := dockerImgParser.ExtractDockerFileDir(dockerfile)
-	if err != nil {
-		return err
+	dockerImage := hierarchy.GetImageByName(imgName)
+	if dockerImage == nil {
+		return fmt.Errorf("unable to find image %s in the analyzed structure (is invocation directory correct?)", imgName)
 	}
 
-	latestVersion := GetLatestImageVersion(versions, imgName)
-	latestVersionStr := latestVersion.String()
-	nextVersion := GetNextVersion(latestVersion, scope)
-	nextVersionStr := nextVersion.String()
-
-	fmt.Printf("Working with %s scope of: %s version: %s => %s\n", scope, imgName, latestVersionStr, nextVersionStr)
+	dockerImage.CalculateNextVersion(scope)
+	fmt.Printf("Working with %s scope of: %s version: %s => %s\n", scope, imgName, dockerImage.GetLatestVersionString(), dockerImage.GetNextVersionString())
 
 	// since now we know the image name and the next version so we can
 	// update config properties so that commands and dockerfile template could be properly filled
-	config.UpdateDynamicProperties(imgName, nextVersionStr, dockerfileDir)
+	config.UpdateDynamicProperties(dockerImage)
 	if config.Verbose {
 		config.PrintProperties()
 	}
 
-	outputPath := fmt.Sprintf("%s/Dockerfile", dockerfileDir)
+	outputPath := fmt.Sprintf("%s/Dockerfile", dockerImage.DockerfileDir)
 	err = FillTemplate(dockerfile, outputPath)
 	if err != nil {
 		return err
@@ -212,7 +235,7 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 		return err
 	}
 
-	result := storeResult(imgName, latestVersionStr, nextVersionStr)
+	result := storeResult(dockerImage)
 
 	// invoke post build listener if there is any
 	if postCmdListener != nil {
@@ -258,11 +281,11 @@ func executeCommand(command string) error {
 }
 
 // Stores the result of successful command processing. Receives image name and its current and next versions.
-func storeResult(imgName string, latestVersionStr string, nextVersionStr string) *CommandResult {
+func storeResult(dockerImage *DockerImage) *CommandResult {
 	result := &CommandResult{
-		Name:           imgName,
-		CurrentVersion: latestVersionStr,
-		NextVersion:    nextVersionStr}
+		Name:           dockerImage.Name,
+		CurrentVersion: dockerImage.GetLatestVersionString(),
+		NextVersion:    dockerImage.GetNextVersionString()}
 
 	commandResults = append(commandResults, result)
 
@@ -271,5 +294,5 @@ func storeResult(imgName string, latestVersionStr string, nextVersionStr string)
 
 // Stores the error of command processing.
 func storeError(err error) {
-	errors = append(errors, err)
+	commandErrors = append(commandErrors, err)
 }

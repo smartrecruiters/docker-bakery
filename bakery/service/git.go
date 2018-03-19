@@ -27,19 +27,6 @@ func NewPostPushListener() PostCommandListener {
 	return &postPushListener{}
 }
 
-// GetLatestImageVersion returns latest semantic version for the given image name available in the provided directory
-// Version is determined based on the last git tag available for that image name
-// In case no previous tags has been found the 0.0.0 is returned
-func GetLatestImageVersion(versions map[string]*semver.Version, imageName string) *semver.Version {
-	v := versions[imageName]
-	if v == nil {
-		startingVersion, _ := semver.NewVersion("0.0.0")
-		return startingVersion
-	}
-
-	return v
-}
-
 // GetLatestVersions returns map with latest versions of the images based on git remote tags.
 // Image name is the key and latest version is the value.
 func GetLatestVersions() (map[string]*semver.Version, error) {
@@ -108,16 +95,30 @@ func TagVersion(imageName, version string) error {
 	return tagCmd.Run()
 }
 
-// GetNextVersion returns the next semantic version according to the scope (major/minor/patch)
-func GetNextVersion(version *semver.Version, scope string) semver.Version {
-	switch scope {
-	case "major":
-		return version.IncMajor()
-	case "minor":
-		return version.IncMinor()
-	case "patch":
-		return version.IncPatch()
-	default:
-		return version.IncPatch()
+// GetGitUserName returns git user name obtained from configuration or error if it could not be obtained
+func GetGitUserName() (string, error) {
+	getGitUserNameCmd := exec.Command("git", "config", "user.name")
+	getGitUserNameCmd.Dir = config.RootDir
+	return extractCommandOutput(getGitUserNameCmd)
+}
+
+// GetGitUserEmail returns git user email obtained from configuration or error if it could not be obtained
+func GetGitUserEmail() (string, error) {
+	getGitUserEmailCmd := exec.Command("git", "config", "user.email")
+	getGitUserEmailCmd.Dir = config.RootDir
+	return extractCommandOutput(getGitUserEmailCmd)
+}
+
+func extractCommandOutput(command *exec.Cmd) (string, error) {
+	out, err := command.Output()
+	if err != nil {
+		return "", err
 	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(out))
+	for scanner.Scan() {
+		return scanner.Text(), nil
+	}
+
+	return "", fmt.Errorf("unable to extract output from %v", command.Args)
 }
