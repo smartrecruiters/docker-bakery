@@ -12,6 +12,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"time"
+
 	"github.com/Masterminds/semver"
 	"github.com/fatih/color"
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
@@ -30,6 +32,7 @@ var commandResults = make([]*CommandResult, 0)
 var dockerImgParser = NewDockerImageParser()
 var versions map[string]*semver.Version
 var hierarchy = NewDockerHierarchy()
+var startTime = time.Now()
 
 // InitConfiguration is called before execution of other commands, parses config and gathers docker image dependencies/hierarchy
 func InitConfiguration(configFile, rootDir string) error {
@@ -165,7 +168,7 @@ func PushDockerImages(dockerfile, scope string, shouldTriggerDependantBuilds boo
 // PrintReport prints the report with processed images and its versions.
 func PrintReport() {
 	fmt.Printf(outputSeparator)
-	fmt.Printf("Processed %d image(s):\n", len(commandResults))
+	fmt.Printf("Processed %d image(s) in %v:\n", len(commandResults), time.Since(startTime))
 	for _, r := range commandResults {
 		fmt.Printf(color.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
 	}
