@@ -17,6 +17,10 @@
   - [Commands config section](#commands-config-section)
 - [Dockerfile.template](#dockerfiletemplate)
 - [Usage](#usage)
+  - [Command help](#command-help)
+  - [Command fill-template](#command-fill-template)
+  - [Command build](#command-build)
+  - [Command push](#command-push)
 - [How to apply it to your project](#how-to-apply-it-to-your-project)
 - [Limitations](#limitations)
 
@@ -87,13 +91,28 @@ Structure of the `config.json` file is as follows:
  This section is dedicated for storing any custom properties that may be available for usage in `Dockerfile.template` files. 
  Feel free to modify this section and provide properties according to your needs. Flat structure should be preserved.
  
- This section will also be updated with dynamic properties during runtime. 
+ This section will also be updated with dynamic properties during runtime. Dynamic properties do not have to be defined 
+ in config as they are automatically added during runtime.
  
  Following properties belong to dynamic ones:
  - `DOCKERFILE_DIR` - will be replaced with currently processed dockerfile dir
  - `IMAGE_NAME` - will be replaced with currently processed image name
  - `IMAGE_VERSION` - will be replaced with currently processed image version
- - `*_VERSION` - where `*` is the image name. There will be that many properties of this kind as many images are in hierarchy. Initially those properties will be filled with latest versions of pushed images.  
+ - `*_VERSION` - where `*` is the image name. There will be that many properties of this kind as many images are in hierarchy. Initially those properties will be filled with latest versions of pushed images.
+ - `BAKERY_BUILDER_NAME` - will be replaced with the git user name (taken from `git config user.name`)  
+ - `BAKERY_BUILDER_EMAIL` - will be replaced with the git user email (taken from `git config user.email`)
+ - `BAKERY_BUILDER_HOST` - will be replaced with hostname of the machine where build is executed
+ - `BAKERY_BUILD_DATE` - will be replaced with current build date 
+ - `BAKERY_IMAGE_HIERARCHY` - will be replaced with the path representing image hierarchy in the following format: 
+ 
+ `parent1:versionOfParent1->parent2:versionOfParent2->imageName:imageVersion` 
+ 
+ Hierarchy is built automatically given that parent images are exporting the same `ENV` variable that can be accessed in child images. Check the example project for references.
+ - `BAKERY_SIGNATURE_VALUE` - will be replaced with a one liner string value embedding other `BAKERY*` variables together. Can be used in templates to create for example `ENV` variable. Example:
+  
+  `SINGATURE=Builder Name;builder@email.com;builder-host-name;2018-03-16 15:47:58;alpine-java:8u144b01_jdk->mammal:3.2.0->dog:4.0.0->dobermann:4.0.0->smaller-dobermann:4.0.0` 
+ - `BAKERY_SIGNATURE_ENVS` - will be replaced with embedded `BAKERY*` variables in a `key=value` format. Convenient if you wish to have all `BAKERY*` variables in a dockerfile under single key. 
+ Check the example project for references. 
 
 <a id="commands-config-section"></a>
 ## Commands config section
@@ -110,18 +129,18 @@ To make use of `docker-bakery` as convenient as possible checkout usage of `Make
 If you don't want to use makefiles you can still use `docker-bakery` tool directly.
 Checkout the CLI help via `docker-bakery -h`. 
 
+<a id="command-help"></a>
+## Command help
 ```
 COMMANDS:
      fill-template, prepare, prepare-recipe  Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.
      build                                   Used to build next version of the images in given scope. Optionally it can skip build of dependant images.
      push                                    Used to push next version of the images in given scope. Optionally it can skip push of dependant images.
      help, h                                 Shows a list of commands or help for one command
-
-
-
-
-
-
+```
+<a id="command-fill-template"></a>
+## Command fill-template
+```
 docker-bakery fill-template -h
 NAME:
    docker-bakery fill-template - Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.
@@ -134,12 +153,10 @@ OPTIONS:
    --output value, -o value     Required. Output Dockerfile generated from template.
    --config value, -c value     Required. Path to config.json with properties and build commands defined.
    --rootDir value, --rd value  Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.
-
-
-
-
-
-
+```
+<a id="command-build"></a>
+## Command build
+```
 docker-bakery build -h
 NAME:
    docker-bakery build - Used to build next version of the images in given scope. Optionally it can skip build of dependant images.
@@ -153,12 +170,10 @@ OPTIONS:
    --config value, -c value      Required. Path to config.json with properties and build commands defined.
    --root-dir value, --rd value  Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.
    --skip-dependants, --sd       Optional. False be default. If this flag is set build of the parent will not trigger dependant builds.
-
-
-
-
-
-
+```
+<a id="command-push"></a>
+## Command push
+```
 docker-bakery push -h
 NAME:
    docker-bakery push - Used to push next version of the images in given scope. Optionally it can skip push of dependant images.
@@ -174,7 +189,6 @@ OPTIONS:
    --skip-dependants, --sd       Optional. False be default. If this flag is set build of the parent will not trigger dependant builds.
 
 ```
-
 
 <a id="how-to-apply-it-to-your-project"></a>
 # How to apply it to your project
