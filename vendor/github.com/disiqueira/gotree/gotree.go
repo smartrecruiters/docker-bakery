@@ -12,7 +12,7 @@ type GTStructure struct {
 	Items []*GTStructure
 }
 
-func StringTree(object GTStructure) (result string) {
+func StringTree(object *GTStructure) (result string) {
 	result += object.Name + "\n"
 	var spaces []bool
 	result += stringObjItems(object.Items, spaces)
@@ -50,14 +50,13 @@ func stringObjItems(items []*GTStructure, spaces []bool) (result string) {
 }
 
 /*PrintTree - Print the tree in console */
-func PrintTree(object GTStructure) {
+func PrintTree(object *GTStructure) {
 	fmt.Println(StringTree(object))
 }
 
 /*ReadFolder - Read a folder and return the generated object */
-func ReadFolder(directory string) GTStructure {
-
-	var parent GTStructure
+func ReadFolder(directory string) *GTStructure {
+	parent := &GTStructure{}
 
 	parent.Name = directory
 	parent.Items = createGTReadFolder(directory)
@@ -66,13 +65,11 @@ func ReadFolder(directory string) GTStructure {
 }
 
 func createGTReadFolder(directory string) []*GTStructure {
-
 	var items []*GTStructure
 	files, _ := ioutil.ReadDir(directory)
 
 	for _, f := range files {
-
-		var child *GTStructure
+		child := &GTStructure{}
 		child.Name = f.Name()
 
 		if f.IsDir() {

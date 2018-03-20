@@ -149,9 +149,9 @@ func (h *dockerHierarchy) buildTree(root *gotree.GTStructure) {
 
 // Prints hierarchy of docker images using external slightly modified (pointers added) gotree library.
 func (h *dockerHierarchy) PrintImageHierarchy(rootName string) {
-	var root gotree.GTStructure
+	root := &gotree.GTStructure{}
 	root.Name = rootName
 	h.createFirstLevelRoots()
-	h.buildTree(&root)
+	h.buildTree(root)
 	gotree.PrintTree(root)
 }
