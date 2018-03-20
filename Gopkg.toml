@@ -31,8 +31,7 @@
 
 [[constraint]]
   name = "github.com/disiqueira/gotree"
-  # will be updated to master once https://github.com/smartrecruiters/GoTree/pull/1 is merged
-  branch = "pointers-in-tree-structure"
+  branch = "master"
   source = "github.com/smartrecruiters/GoTree"
 
 [[constraint]]

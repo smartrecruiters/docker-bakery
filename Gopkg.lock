@@ -8,10 +8,10 @@
   version = "v1.4.0"
 
 [[projects]]
-  branch = "pointers-in-tree-structure"
+  branch = "master"
   name = "github.com/disiqueira/gotree"
   packages = ["."]
-  revision = "53d0eea4a0fee7a78fb7b72f138b7e69fc175318"
+  revision = "49f76505125e266d1170e6847c13ee982e489c3e"
   source = "github.com/smartrecruiters/GoTree"
 
 [[projects]]
@@ -47,6 +47,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "06cc67d587c53a980e3865f51c70a54322be639d01d88334918d0c4dbf2e483d"
+  inputs-digest = "783e13db72a37c9773cf2caaacd6bbb90c0185dfdc50864d0e02aa51955873b0"
   solver-name = "gps-cdcl"
   solver-version = 1
