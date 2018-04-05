@@ -1,6 +1,7 @@
 <p align="center">
 	<h1 align="center">docker-bakery</h1>
 	<p align="center">
+		<a href="https://travis-ci.org/smartrecruiters/docker-bakery"><img alt="Build" src="https://travis-ci.org/smartrecruiters/docker-bakery.svg?branch=master"></a>	
 		<a href="/LICENSE.md"><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>	
 		<a href="https://goreportcard.com/report/github.com/smartrecruiters/docker-bakery"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/smartrecruiters/docker-bakery?style=flat-square"></a>
 		<a href="http://godoc.org/github.com/smartrecruiters/docker-bakery"><img alt="Go Doc" src="https://img.shields.io/badge/godoc-reference-brightgreen.svg?style=flat-square"></a>
