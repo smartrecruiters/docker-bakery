@@ -3,7 +3,7 @@ VERSION=1.0.7
 
 .DEFAULT_GOAL: all
 
-.PHONY: all test build fmt install lint install-lint
+.PHONY: all test build fmt install lint install-lint ci
 
 all: install fmt build test lint
 
