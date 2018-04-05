@@ -27,14 +27,12 @@ test:
 	@echo "Running tests"
 	go test -v ./... && echo "TESTS PASSED"
 
-ci: test
+ci: build test lint
+
+build:
 	@echo "Building sources"
 	go build -v ./...
 
-build: fmt test
-	@echo "Building sources"
-	go build -v ./...
-
-release: build
+release: fmt build test lint
 	@echo $(VERSION)
 	./release.sh $(VERSION)
