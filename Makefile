@@ -3,7 +3,7 @@ VERSION=1.0.7
 
 .DEFAULT_GOAL: all
 
-.PHONY: all test build fmt install lint install-lint
+.PHONY: all test build fmt install lint install-lint ci
 
 all: install fmt build test lint
 
@@ -27,10 +27,12 @@ test:
 	@echo "Running tests"
 	go test -v ./... && echo "TESTS PASSED"
 
-build: fmt test
+ci: build test lint
+
+build:
 	@echo "Building sources"
 	go build -v ./...
 
-release: build
+release: fmt build test lint
 	@echo $(VERSION)
 	./release.sh $(VERSION)

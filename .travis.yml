@@ -1,3 +1,9 @@
 language: go
-  go:
-    - "1.10"
+go: '1.10'
+
+before_install:
+  - go get -v github.com/golang/lint/golint
+  - go get -v golang.org/x/tools/cmd/goimports
+
+script:
+  - make ci
