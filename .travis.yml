@@ -6,4 +6,4 @@ before_install:
   - go get -v golang.org/x/tools/cmd/goimports
 
 script:
-  - make all
+  - make ci

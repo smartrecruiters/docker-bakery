@@ -27,6 +27,10 @@ test:
 	@echo "Running tests"
 	go test -v ./... && echo "TESTS PASSED"
 
+ci: test
+	@echo "Building sources"
+	go build -v ./...
+
 build: fmt test
 	@echo "Building sources"
 	go build -v ./...
