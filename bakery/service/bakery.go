@@ -86,17 +86,17 @@ func DumpLatestVersions(fileName, excludeDirsPattern string) error {
 
 // filterOutImagesFromDirs removes images that are stored in directories that match provided pattern.
 func filterOutImagesFromDirs(excludeDirsPattern string) {
-	if len(excludeDirsPattern) > 0 {
-		r, _ := regexp.Compile(excludeDirsPattern)
-		images := hierarchy.GetImages()
-		for imgName, img := range images {
-			shouldExcludeImage := r.MatchString(img.DockerfileDir)
-			if shouldExcludeImage {
-				delete(versions, imgName)
-				if config.Verbose {
-					fmt.Printf("Excluding image from %s as it matches pattern %s\n", img.DockerfileDir, excludeDirsPattern)
-				}
-			}
+	if len(excludeDirsPattern) <= 0 {
+		return
+	}
+
+	r, _ := regexp.Compile(excludeDirsPattern)
+	images := hierarchy.GetImages()
+	for imgName, img := range images {
+		shouldExcludeImage := r.MatchString(img.DockerfileDir)
+		if shouldExcludeImage {
+			delete(versions, imgName)
+			commons.Debugf("Excluding image from %s as it matches pattern %s", img.DockerfileDir, excludeDirsPattern)
 		}
 	}
 }
@@ -107,9 +107,7 @@ func filterOutNotExistingImages() {
 	for imgName := range versions {
 		if _, exists := images[imgName]; !exists {
 			delete(versions, imgName)
-			if config.Verbose {
-				fmt.Printf("Excluding non existing image %s\n", imgName)
-			}
+			commons.Debugf("Excluding non existing image %s", imgName)
 		}
 	}
 }
