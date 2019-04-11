@@ -69,7 +69,7 @@ func MakeDir(path string) error {
 	return err
 }
 
-// WriteToJSONFile marshals provided content to json and stores it in file with provided name.
+// WriteToJSONFile marshalls provided content to json and stores it in file with provided name.
 func WriteToJSONFile(content interface{}, fileName string) error {
 	data, err := json.MarshalIndent(content, prefix, indent)
 	if err != nil {
