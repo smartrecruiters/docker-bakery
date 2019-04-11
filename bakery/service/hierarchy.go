@@ -90,6 +90,11 @@ func (h *dockerHierarchy) GetImagesWithDependants() map[string][]*DockerImage {
 	return h.imagesWithDependantsMap
 }
 
+// Return the map of docker images where key is the image name and value is the docker image object.
+func (h *dockerHierarchy) GetImages() map[string]*DockerImage {
+	return h.images
+}
+
 // Creates the first level of the hierarchy tree. External images are qualified as first level parents.
 func (h *dockerHierarchy) createFirstLevelRoots() {
 	for _, i := range h.imagesTreeSlice {

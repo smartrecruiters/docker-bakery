@@ -70,6 +70,9 @@ type DockerHierarchy interface {
 	// Returns map with docker images where key is the short docker image name and
 	// the value is a slice of dependent images
 	GetImagesWithDependants() map[string][]*DockerImage
+	// Returns map with docker images where key is the short docker image name and
+	// the value is docker image object
+	GetImages() map[string]*DockerImage
 	// Prints gathered hierarchy under a given root name
 	PrintImageHierarchy(string)
 }

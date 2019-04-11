@@ -110,5 +110,32 @@ func GetCommands() []cli.Command {
 			Usage:  "Used to display hierarchy of the images",
 			Action: commands.InitConfiguration,
 		},
+		{
+			Name:    "dump-latest-versions",
+			Aliases: []string{"dump"},
+			Hidden:  false,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "config, c",
+					Usage: "Required. Path to config.json with properties and build commands defined.",
+				},
+				cli.StringFlag{
+					Name:  "rootDir, rd",
+					Usage: "Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.",
+				},
+				cli.StringFlag{
+					Name:  "file-name, file, f",
+					Usage: "Optional. File name where the result data will be stored in json format.",
+					Value: "docker-images.json",
+				},
+				cli.StringFlag{
+					Name:  "exclude-dirs, e",
+					Usage: "Optional. Pattern used to exclude images located in directories that match provided argument.",
+				},
+			},
+			Usage:  "Used to dump data about latest versions of images to the provided file",
+			Before: commands.InitConfiguration,
+			Action: commands.DumpLatestVersionsCmd,
+		},
 	}
 }
