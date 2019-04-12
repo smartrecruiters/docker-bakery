@@ -1,5 +1,5 @@
 APP_NAME=docker-bakery
-VERSION=1.0.7
+VERSION=1.1.0
 
 .DEFAULT_GOAL: all
 

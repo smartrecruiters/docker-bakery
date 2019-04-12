@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -73,6 +74,42 @@ func InitConfiguration(configFile, rootDir string) error {
 	dependencies = hierarchy.GetImagesWithDependants()
 
 	return nil
+}
+
+// DumpLatestVersions saves images with their latest version in json format to file.
+// Optionally it can exclude images from provided directories.
+func DumpLatestVersions(fileName, excludeDirsPattern string) error {
+	filterOutImagesFromDirs(excludeDirsPattern)
+	filterOutNotExistingImages()
+	return commons.WriteToJSONFile(versions, fileName)
+}
+
+// filterOutImagesFromDirs removes images that are stored in directories that match provided pattern.
+func filterOutImagesFromDirs(excludeDirsPattern string) {
+	if len(excludeDirsPattern) <= 0 {
+		return
+	}
+
+	r, _ := regexp.Compile(excludeDirsPattern)
+	images := hierarchy.GetImages()
+	for imgName, img := range images {
+		shouldExcludeImage := r.MatchString(img.DockerfileDir)
+		if shouldExcludeImage {
+			delete(versions, imgName)
+			commons.Debugf("Excluding image from %s as it matches pattern %s", img.DockerfileDir, excludeDirsPattern)
+		}
+	}
+}
+
+// filterOutNotExistingImages removes images that no longer exist but still may be present in git tags.
+func filterOutNotExistingImages() {
+	images := hierarchy.GetImages()
+	for imgName := range versions {
+		if _, exists := images[imgName]; !exists {
+			delete(versions, imgName)
+			commons.Debugf("Excluding non existing image %s", imgName)
+		}
+	}
 }
 
 func updateConfigProperties() {
@@ -266,6 +303,10 @@ func ExecuteDockerCommand(command, dockerfile, scope string, postCmdListener Pos
 // Executes command and prints to the stdout its output.
 func executeCommand(command string) error {
 	t, err := template.New("dockerCmd").Parse(command)
+	if err != nil {
+		return err
+	}
+
 	var cmdBuf bytes.Buffer
 	err = t.Execute(&cmdBuf, config.Properties)
 	if err != nil {

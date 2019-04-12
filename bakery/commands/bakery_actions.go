@@ -28,3 +28,8 @@ func BuildDockerfileCmd(c *cli.Context) error {
 func PushDockerImagesCmd(c *cli.Context) error {
 	return service.PushDockerImages(c.String("d"), c.String("s"), !c.Bool("sd"))
 }
+
+// DumpLatestVersionsCmd dumps information about images and their latest versions to file in json format.
+func DumpLatestVersionsCmd(c *cli.Context) error {
+	return service.DumpLatestVersions(c.String("f"), c.String("e"))
+}

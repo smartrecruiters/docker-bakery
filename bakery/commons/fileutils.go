@@ -1,9 +1,16 @@
 package commons
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path"
 	"text/template"
+)
+
+const (
+	prefix = ""
+	indent = "\t"
 )
 
 // FillTemplate fills source template from file and stores it under provided destination. To fill the template provided map with mappings is used.
@@ -60,4 +67,14 @@ func MakeDir(path string) error {
 		}
 	}
 	return err
+}
+
+// WriteToJSONFile marshalls provided content to json and stores it in file with provided name.
+func WriteToJSONFile(content interface{}, fileName string) error {
+	data, err := json.MarshalIndent(content, prefix, indent)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(fileName, []byte(string(data[:])+"\n"), 0755)
 }
