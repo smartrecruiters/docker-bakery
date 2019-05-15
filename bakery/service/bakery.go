@@ -21,9 +21,10 @@ import (
 )
 
 const (
-	unableToDetermine = "unable-to-determine"
-	dependencyPrefix  = "FROM "
-	outputSeparator   = "====================================================================\n"
+	propertyKeyValueSeparator = "="
+	unableToDetermine         = "unable-to-determine"
+	dependencyPrefix          = "FROM "
+	outputSeparator           = "====================================================================\n"
 )
 
 var config *Config
@@ -36,7 +37,7 @@ var hierarchy = NewDockerHierarchy()
 var startTime = time.Now()
 
 // InitConfiguration is called before execution of other commands, parses config and gathers docker image dependencies/hierarchy
-func InitConfiguration(configFile, rootDir string) error {
+func InitConfiguration(configFile, rootDir string, additionalProperties []string) error {
 	var err error
 	if configFile == "" {
 		return fmt.Errorf("config file path has to be provided")
@@ -62,7 +63,7 @@ func InitConfiguration(configFile, rootDir string) error {
 		return err
 	}
 
-	updateConfigProperties()
+	updateConfigProperties(additionalProperties)
 
 	err = hierarchy.AnalyzeStructure(config.RootDir, versions)
 	if err != nil {
@@ -112,7 +113,7 @@ func filterOutNotExistingImages() {
 	}
 }
 
-func updateConfigProperties() {
+func updateConfigProperties(additionalProperties []string) {
 	// update config properties with the latest versions of available images
 	// versions are determined from the git tags
 	// this is especially useful when for the first time new child image is about to be build (without being triggered by a parent build)
@@ -128,6 +129,20 @@ func updateConfigProperties() {
 	config.setBuilderName(name)
 	config.setBuilderEmail(email)
 	config.setBuilderHost(host)
+
+	overrideWithRuntimeProvidedProperties(additionalProperties)
+}
+
+func overrideWithRuntimeProvidedProperties(additionalProperties []string) {
+	for _, additionalProperty := range additionalProperties {
+		keyValuePair := strings.Split(additionalProperty, propertyKeyValueSeparator)
+		if len(keyValuePair) != 2 {
+			fmt.Printf("Unable to parse provided property: %s - expecting key and value to be separated with %s", additionalProperty, propertyKeyValueSeparator)
+			continue
+		}
+		commons.Debugf("Overriding config property: %s with %s", keyValuePair[0], keyValuePair[1])
+		config.Properties[keyValuePair[0]] = keyValuePair[1]
+	}
 }
 
 // valueGetterFn represents no-arg function that returns a string and possibly an error
