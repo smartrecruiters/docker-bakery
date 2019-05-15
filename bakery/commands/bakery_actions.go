@@ -9,7 +9,7 @@ import (
 // InitConfiguration initializes configuration for the rest of invoked commands.
 // Receives config file path and optionally root directory to override the config section.
 func InitConfiguration(c *cli.Context) error {
-	return service.InitConfiguration(c.String("c"), c.String("rd"))
+	return service.InitConfiguration(c.String("c"), c.String("rd"), c.StringSlice("p"))
 }
 
 // FillTemplateCmd fills input dockerfile template and stores the result under provided output.

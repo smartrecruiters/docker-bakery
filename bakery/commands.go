@@ -30,6 +30,10 @@ func GetCommands() []cli.Command {
 					Name:  "rootDir, rd",
 					Usage: "Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.",
 				},
+				cli.StringSliceFlag{
+					Name:  "property, p",
+					Usage: "Optional. Allows for providing additional multiple properties that can be used during templating. Overrides properties defined in config.json file. Expected format is: -p propertyName=propertyValue",
+				},
 			},
 			Usage:  "Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.",
 			Before: commands.InitConfiguration,
@@ -58,6 +62,10 @@ func GetCommands() []cli.Command {
 				cli.BoolFlag{
 					Name:  "skip-dependants, sd",
 					Usage: "Optional. False be default. If this flag is set build of the parent will not trigger dependant builds.",
+				},
+				cli.StringSliceFlag{
+					Name:  "property, p",
+					Usage: "Optional. Allows for providing additional multiple properties that can be used during templating. Overrides properties defined in config.json file. Expected format is: -p propertyName=propertyValue",
 				},
 			},
 			Usage:  "Used to build next version of the images in given scope. Optionally it can skip build of dependant images.",
