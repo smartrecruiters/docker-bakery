@@ -11,6 +11,7 @@
 
 - [Purpose](#purpose)
 - [Features](#features)
+- [Example usage](#example-usage)
 - [Example project](#example-project)
 - [Assumptions](#assumptions)
 - [Config](#config)
@@ -42,10 +43,13 @@ Aim of the `docker-bakery` is to provide simple solution for automatic rebuildin
 - Versioning with `git` tags
 - Written in `golang`
 
+<a id="example-usage"></a>
+# Example usage
+!["Example usage"](docker-bakery-demo.gif)
+
 <a id="example-project"></a>
 # Example project
 See [docker-bakery-example](https://github.com/smartrecruiters/docker-bakery-example) to check how this tool works in action.
-
 
 <a id="assumptions"></a>
 # Assumptions
@@ -134,10 +138,13 @@ Checkout the CLI help via `docker-bakery -h`.
 ## Command help
 ```
 COMMANDS:
-     fill-template, prepare, prepare-recipe  Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.
-     build                                   Used to build next version of the images in given scope. Optionally it can skip build of dependant images.
-     push                                    Used to push next version of the images in given scope. Optionally it can skip push of dependant images.
-     help, h                                 Shows a list of commands or help for one command
+     fill-template, prepare, prepare-recipe         Used to fill Dockerfile.template file. Values needed for template are taken from the config file and from dynamic properties provided during runtime.
+     build                                          Used to build next version of the images in given scope. Optionally it can skip build of dependant images.
+     push                                           Used to push next version of the images in given scope. Optionally it can skip push of dependant images.
+     show-structure, ss, show-hierarchy, hierarchy  Used to display hierarchy of the images
+     dump-latest-versions, dump                     Used to dump data about latest versions of images to the provided file
+     help, h                                        Shows a list of commands or help for one command
+
 ```
 <a id="command-fill-template"></a>
 ## Command fill-template
@@ -171,6 +178,8 @@ OPTIONS:
    --config value, -c value      Required. Path to config.json with properties and build commands defined.
    --root-dir value, --rd value  Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.
    --skip-dependants, --sd       Optional. False be default. If this flag is set build of the parent will not trigger dependant builds.
+   --property value, -p value    Optional. Allows for providing additional multiple properties that can be used during templating. Overrides properties defined in config.json file. Expected format is: -p propertyName=propertyValue
+     
 ```
 <a id="command-push"></a>
 ## Command push
