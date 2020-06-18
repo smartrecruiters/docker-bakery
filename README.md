@@ -84,6 +84,7 @@ Structure of the `config.json` file is as follows:
 		"defaultBuildCommand": "docker build --tag {{.IMAGE_NAME}}:{{.IMAGE_VERSION}} --tag {{.DEFAULT_PUSH_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}} --tag {{.DEFAULT_PULL_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}} {{.DOCKERFILE_DIR}}",
 		"defaultPushCommand": "docker push {{.DEFAULT_PUSH_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}}"
 	},
+	"reportFilename": "custom-report-filename.json",
 	"verbose": false,
 	"autoBuildExcludes": [
 		"some-image-name-that-will-be-excluded-from-build-when-parent-changes"

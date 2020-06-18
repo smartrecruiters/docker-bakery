@@ -224,6 +224,9 @@ func PrintReport() {
 	for _, r := range commandResults {
 		fmt.Printf(color.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
 	}
+	if len(config.ReportFilename) > 0 {
+		commons.WriteToJSONFile(commandResults, config.ReportFilename)
+	}
 	errorCount := len(commandErrors)
 	if errorCount > 0 {
 		fmt.Printf(color.RedString("Following (%d) errors occurred during image processing:\n", errorCount))
