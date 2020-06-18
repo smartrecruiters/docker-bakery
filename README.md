@@ -128,7 +128,7 @@ Commands defined here as templates will be filled with available defined propert
 
 <a id="other-config"></a>
 ## Other config attributes
-  `reportFilename` - if set it will be used as a file name to store information about successfully build images in JSON format. 
+  `reportFilename` - if set it will be used as a file name to store information (in JSON format) about successfully built images. 
 
 <a id="dockerfiletemplate"></a>
 # Dockerfile.template
