@@ -17,6 +17,7 @@
 - [Config](#config)
   - [Properties config section](#properties-config-section)
   - [Commands config section](#commands-config-section)
+  - [Other config attributes](#other-config)
 - [Dockerfile.template](#dockerfiletemplate)
 - [Usage](#usage)
   - [Command help](#command-help)
@@ -84,6 +85,7 @@ Structure of the `config.json` file is as follows:
 		"defaultBuildCommand": "docker build --tag {{.IMAGE_NAME}}:{{.IMAGE_VERSION}} --tag {{.DEFAULT_PUSH_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}} --tag {{.DEFAULT_PULL_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}} {{.DOCKERFILE_DIR}}",
 		"defaultPushCommand": "docker push {{.DEFAULT_PUSH_REGISTRY}}/{{.IMAGE_NAME}}:{{.IMAGE_VERSION}}"
 	},
+	"reportFileName": "custom-report-filename.json",
 	"verbose": false,
 	"autoBuildExcludes": [
 		"some-image-name-that-will-be-excluded-from-build-when-parent-changes"
@@ -122,7 +124,11 @@ Structure of the `config.json` file is as follows:
 <a id="commands-config-section"></a>
 ## Commands config section
 This section contains two templates used for building and pushing docker images. It allows for specifying custom parameters. 
-Commands defined here as templates will be filled with available defined properties from the config section + the dynamic properties set during runtime.  
+Commands defined here as templates will be filled with available defined properties from the config section + the dynamic properties set during runtime. 
+
+<a id="other-config"></a>
+## Other config attributes
+  `reportFileName` - if set it will be used as a file name to store information (in JSON format) about successfully built images. 
 
 <a id="dockerfiletemplate"></a>
 # Dockerfile.template

@@ -12,6 +12,7 @@ type Config struct {
 	RootDir           string            `json:"rootDir"`
 	Verbose           bool              `json:"verbose"`
 	AutoBuildExcludes []string          `json:"autoBuildExcludes"`
+	ReportFileName    string            `json:"reportFileName"`
 }
 
 // Commands is used as part of the config to contain template of build and push commands
