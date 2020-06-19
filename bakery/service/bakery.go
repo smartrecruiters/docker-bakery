@@ -224,8 +224,8 @@ func PrintReport() {
 	for _, r := range commandResults {
 		fmt.Printf(color.GreenString("\t%s %s => %s\n", r.Name, r.CurrentVersion, r.NextVersion))
 	}
-	if len(config.ReportFilename) > 0 {
-		commons.WriteToJSONFile(commandResults, config.ReportFilename)
+	if len(config.ReportFileName) > 0 {
+		commons.WriteToJSONFile(commandResults, config.ReportFileName)
 	}
 	errorCount := len(commandErrors)
 	if errorCount > 0 {
