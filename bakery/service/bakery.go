@@ -346,6 +346,7 @@ func executeCommand(command string) error {
 func storeResult(dockerImage *DockerImage) *CommandResult {
 	result := &CommandResult{
 		Name:           dockerImage.Name,
+		DockerfileDir:  dockerImage.DockerfileDir,
 		CurrentVersion: dockerImage.GetLatestVersionString(),
 		NextVersion:    dockerImage.GetNextVersionString()}
 
