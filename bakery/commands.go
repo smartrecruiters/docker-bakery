@@ -145,5 +145,39 @@ func GetCommands() []cli.Command {
 			Before: commands.InitConfiguration,
 			Action: commands.DumpLatestVersionsCmd,
 		},
+		{
+			Name:    "copy-images-hierarchy",
+			Aliases: []string{"cph"},
+			Hidden:  false,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "config, c",
+					Usage: "Required. Path to config.json with properties and build commands defined.",
+				},
+				cli.StringFlag{
+					Name:  "rootDir, rd",
+					Usage: "Optional. Used to override rootDir of the dockerfiles location. Can be defined in config.json, provided in this argument or determined dynamically from the base dir of config file.",
+				},
+				cli.StringFlag{
+					Name:  "base-image, image",
+					Usage: "Base image name whose hierarchy will be copied",
+				},
+				cli.BoolFlag{
+					Name:  "recursive, r",
+					Usage: "Optional. When set to true, will generate whole images family. False generates only 1 level of children",
+				},
+				cli.StringSliceFlag{
+					Name:  "skip-existing-dirs",
+					Usage: "Optional. When set to true, ignore error when target path during copying already exist",
+				},
+				cli.StringSliceFlag{
+					Name:  "replace, rp",
+					Usage: "Optional. Allows for providing additional string replacements, to automate updates in new family. Will change all occurrences in the child images. Expected format is: -rp originalString=replacementString. Example: -rp python3.8=python3.9",
+				},
+			},
+			Usage:  "This command takes 'new-parent-image' image and copies images hierarchy from 'base-image', for example to simplify new image versions when updating some dependencies (for example from Ubuntu 18 to Ubuntu 20, without loosing previous images) ",
+			Before: commands.InitConfiguration,
+			Action: commands.GenerateImagesTree,
+		},
 	}
 }

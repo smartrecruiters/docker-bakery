@@ -33,3 +33,8 @@ func PushDockerImagesCmd(c *cli.Context) error {
 func DumpLatestVersionsCmd(c *cli.Context) error {
 	return service.DumpLatestVersions(c.String("f"), c.String("e"))
 }
+
+// GenerateImagesTree generate ancestors for a given image with a new parent image
+func GenerateImagesTree(c *cli.Context) error {
+	return service.GenerateImagesTree(c.String("base-image"), c.Bool("r"), c.Bool("skip-existing-dirs"), c.StringSlice("replace"))
+}

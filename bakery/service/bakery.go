@@ -191,7 +191,7 @@ func FillTemplate(inputFile, outputFile string) error {
 		}
 
 		// if inputFile does not exist check for existence of the template
-		templateFile := path.Join(inputFileDir, "Dockerfile.template")
+		templateFile := path.Join(inputFileDir, dockerFileTemplateName)
 		if _, err := os.Stat(templateFile); os.IsNotExist(err) {
 			return fmt.Errorf("neither %s nor %s does not exists", inputFile, templateFile)
 		}
