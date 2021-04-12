@@ -73,12 +73,16 @@ func (cfg *Config) UpdateVersionProperties(versions map[string]*semver.Version) 
 // The result of invocation setDynamicImageVersionProperty('redis', '1.0.0')
 // would be property REDIS_VERSION = '1.0.0'
 func (cfg *Config) setDynamicImageVersionProperty(imgName, version string) {
+	propertyName := dynamicImageVersionName(imgName)
+	commons.Debugf("Setting property %s to %s", propertyName, version)
+	cfg.Properties[propertyName] = version
+}
+
+func dynamicImageVersionName(imgName string) string {
 	imgNameInTmpl := strings.ToUpper(imgName)
 	imgNameInTmpl = strings.Replace(imgNameInTmpl, "-", "_", -1)
 	imgNameInTmpl = strings.Replace(imgNameInTmpl, ".", "_", -1)
-	propertyName := fmt.Sprintf("%s_VERSION", imgNameInTmpl)
-	commons.Debugf("Setting property %s to %s", propertyName, version)
-	cfg.Properties[propertyName] = version
+	return fmt.Sprintf("%s_VERSION", imgNameInTmpl)
 }
 
 // setImageVersion sets the IMAGE_VERSION property to the provided version.
