@@ -89,8 +89,8 @@ func updateUnknownParentsVersions(h DockerHierarchy) {
 			nonExisting = append(nonExisting, imageName)
 		}
 	}
-	for _, dynamicVersionName := range nonExisting {
-		config.setDynamicImageVersionProperty(dynamicVersionName, "0.0.0")
+	for _, imageName := range nonExisting {
+		config.setDynamicImageVersionProperty(imageName, "0.0.0")
 	}
 }
 
