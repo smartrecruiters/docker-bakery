@@ -83,7 +83,7 @@ func InitConfiguration(configFile, rootDir string, additionalProperties []string
 // we're still able to produce valid Dockerfile with parent image version set to 0.0.0
 func updateUnknownParentsVersions(h DockerHierarchy) {
 	nonExisting := make([]string, 0)
-	for imageName, _ := range h.GetImages() {
+	for imageName := range h.GetImages() {
 		dynamicName := dynamicImageVersionName(imageName)
 		if _, ok := config.Properties[dynamicName]; !ok {
 			nonExisting = append(nonExisting, imageName)
