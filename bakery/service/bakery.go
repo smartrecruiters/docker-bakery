@@ -70,11 +70,28 @@ func InitConfiguration(configFile, rootDir string, additionalProperties []string
 		return err
 	}
 
+	updateUnknownParentsVersions(hierarchy)
+
 	rootName := fmt.Sprintf("Dockerfiles hierarchy discovered in %s", config.RootDir)
 	hierarchy.PrintImageHierarchy(rootName)
 	dependencies = hierarchy.GetImagesWithDependants()
 
 	return nil
+}
+
+// updateUnknownParentsVersions makes sure that when building an image whose parent x_VERSION from template is unknown,
+// we're still able to produce valid Dockerfile with parent image version set to 0.0.0
+func updateUnknownParentsVersions(h DockerHierarchy) {
+	nonExisting := make([]string, 0)
+	for imageName := range h.GetImages() {
+		dynamicName := dynamicImageVersionName(imageName)
+		if _, ok := config.Properties[dynamicName]; !ok {
+			nonExisting = append(nonExisting, imageName)
+		}
+	}
+	for _, imageName := range nonExisting {
+		config.setDynamicImageVersionProperty(imageName, "0.0.0")
+	}
 }
 
 // DumpLatestVersions saves images with their latest version in json format to file.
