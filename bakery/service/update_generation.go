@@ -36,13 +36,10 @@ func createNewNameReplacer(nameReplacements []string) nameReplacer {
 
 func generateAncestors(previousImageName string, dependenciesMap map[string][]*DockerImage, replacer nameReplacer, recursive bool, skipExistingDirectories bool) error {
 	ancestorsToGenerate, err := getChildrenToUpdate(previousImageName, dependenciesMap, replacer, recursive)
-	fmt.Println("Found ancestors to recreate:")
-	for _, ancestor := range ancestorsToGenerate {
-		fmt.Println(ancestor.childOriginImageName)
-	}
 	if err != nil {
 		return err
 	}
+	printAncestorsToGenerate(ancestorsToGenerate)
 	for _, ancestor := range ancestorsToGenerate {
 		err := generateChildProjects(ancestor, replacer, skipExistingDirectories)
 		if err != nil {
@@ -50,6 +47,13 @@ func generateAncestors(previousImageName string, dependenciesMap map[string][]*D
 		}
 	}
 	return nil
+}
+
+func printAncestorsToGenerate(ancestorsToGenerate []imageToGenerate) {
+	fmt.Println("Found ancestors to recreate:")
+	for _, ancestor := range ancestorsToGenerate {
+		fmt.Println(ancestor.childOriginImageName)
+	}
 }
 
 func generateChildProjects(ancestor imageToGenerate, replacer nameReplacer, skipExistingDirectories bool) error {
@@ -104,9 +108,9 @@ type nameReplacer struct {
 
 func (n nameReplacer) add(from, to string) nameReplacer {
 	n.replacements = append(n.replacements, simpleNameReplacer(from, to))
-	from2 := strings.ToUpper(strings.Replace(from, "-", "_", -1))
-	to2 := strings.ToUpper(strings.Replace(to, "-", "_", -1))
-	n.replacements = append(n.replacements, simpleNameReplacer(from2, to2))
+	sourceNameInVersionFormat := imageNameToVersionFormat(from)
+	targetNameInVersionFormat := imageNameToVersionFormat(to)
+	n.replacements = append(n.replacements, simpleNameReplacer(sourceNameInVersionFormat, targetNameInVersionFormat))
 	return n
 }
 
