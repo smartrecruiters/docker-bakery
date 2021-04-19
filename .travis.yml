@@ -2,7 +2,7 @@ language: go
 go: '1.15'
 
 before_install:
-  - go get -v github.com/golang/lint/golint
+  - go get -v ggolang.org/x/lint/golint
   - go get -v golang.org/x/tools/cmd/goimports
 
 script:
