@@ -2,51 +2,103 @@
 
 
 [[projects]]
+  digest = "1:b311407991ca82ea46706557aef8d32b56e96c2f95481754b5a5d34a984a3af3"
   name = "github.com/Masterminds/semver"
   packages = ["."]
+  pruneopts = "UT"
   revision = "15d8430ab86497c5c0da827b748823945e1cf1e1"
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
+  digest = "1:22a48fd62fbacae728d56aea40588fdc91505fdb2ee4380af02e1fa17005f4d1"
   name = "github.com/disiqueira/gotree"
   packages = ["."]
+  pruneopts = "UT"
   revision = "49f76505125e266d1170e6847c13ee982e489c3e"
   source = "github.com/smartrecruiters/GoTree"
 
 [[projects]]
+  digest = "1:4bb94bb2d837b5c7489d9e5e1fcffbc81fa1cb43024cbb4fe827787378f01e3b"
   name = "github.com/fatih/color"
   packages = ["."]
+  pruneopts = "UT"
   revision = "507f6050b8568533fb3f5504de8e5205fa62a114"
   version = "v1.6.0"
 
 [[projects]]
+  digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
   name = "github.com/mattn/go-colorable"
   packages = ["."]
+  pruneopts = "UT"
   revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
   version = "v0.0.9"
 
 [[projects]]
+  digest = "1:d4d17353dbd05cb52a2a52b7fe1771883b682806f68db442b436294926bbfafb"
   name = "github.com/mattn/go-isatty"
   packages = ["."]
+  pruneopts = "UT"
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
   version = "v0.0.3"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:edb231f4f062fe87e1cc93351e1ee06d4cebf553d1f85f9f3b9b4903df42df20"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "acba37e5db06f0093b465a7d47822bf13644b66c"
+  version = "v1.7.0"
+
+[[projects]]
   branch = "master"
+  digest = "1:189a0e6e9c657bb662bafc41a796360d11c88eed7614b1b6f003b8fbc8847e5e"
   name = "github.com/urfave/cli"
   packages = ["."]
+  pruneopts = "UT"
   revision = "8e01ec4cd3e2d84ab2fe90d8210528ffbb06d8ff"
 
 [[projects]]
   branch = "master"
+  digest = "1:762c02c879782ea804e683ef112a5c77c0ca5866e8e6be264f87f6d596874ae1"
   name = "golang.org/x/sys"
   packages = ["unix"]
+  pruneopts = "UT"
   revision = "d8e400bc7db4870d786864138af681469693d18c"
+
+[[projects]]
+  branch = "v3"
+  digest = "1:107a619d3c3bcca214b2b7db810a5dffcd74b5d0262813cb2986e063fae2722f"
+  name = "gopkg.in/yaml.v3"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "496545a6307b2a7d7a710fd516e5e16e8ab62dbc"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "783e13db72a37c9773cf2caaacd6bbb90c0185dfdc50864d0e02aa51955873b0"
+  input-imports = [
+    "github.com/Masterminds/semver",
+    "github.com/disiqueira/gotree",
+    "github.com/fatih/color",
+    "github.com/stretchr/testify/assert",
+    "github.com/urfave/cli",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
