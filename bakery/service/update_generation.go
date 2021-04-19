@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"strings"
 )
 
+// GenerateImagesTree generate ancestors for a given image with a new parent image
 func GenerateImagesTree(previousImageName string, recursive, skipExistingDirectories bool, nameReplacements []string) error {
 	previousDockerImage := hierarchy.GetImageByName(previousImageName)
 	if previousDockerImage == nil {
@@ -127,9 +127,8 @@ func checkDirectoryExistence(targetPath string, skipExistingDirectories bool) (b
 		if skipExistingDirectories {
 			fmt.Printf("directory exists: %s, ignored explicitly\n", targetPath)
 			return true, nil
-		} else {
-			return true, errors.New(fmt.Sprintf("error - target path %s already exist", targetPath))
 		}
+		return true, fmt.Errorf("error - target path %s already exist", targetPath)
 	}
 	return false, nil
 }

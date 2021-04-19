@@ -214,7 +214,6 @@ Applying `docker-bakery` is quite simple. Take a look [here](https://github.com/
 # Limitations
 At the moment docker multi-stage builds are not fully supported. Only the first line `FROM` is taken into consideration when determining the parent of the image and its place in the hierarchy. 
 
-
 ## Command copy-images-hierarchy
 
 Let's say you have a given hierarchy of images:
