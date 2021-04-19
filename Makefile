@@ -9,7 +9,7 @@ all: install fmt build test lint
 
 install:
 	@echo "Installing dependencies"
-	go get -v -t ./...
+	dep ensure -v
 
 fmt:
 	@echo "Formating source code"
