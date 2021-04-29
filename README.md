@@ -24,6 +24,7 @@
   - [Command fill-template](#command-fill-template)
   - [Command build](#command-build)
   - [Command push](#command-push)
+  - [Command copy-images-hierarchy](#command-copy-images-hierarchy)
 - [How to apply it to your project](#how-to-apply-it-to-your-project)
 - [Limitations](#limitations)
 
@@ -206,14 +207,7 @@ OPTIONS:
 
 ```
 
-<a id="how-to-apply-it-to-your-project"></a>
-# How to apply it to your project
-Applying `docker-bakery` is quite simple. Take a look [here](https://github.com/smartrecruiters/docker-bakery-example#how-to-apply-it-to-your-project)
-
-<a id="limitations"></a>
-# Limitations
-At the moment docker multi-stage builds are not fully supported. Only the first line `FROM` is taken into consideration when determining the parent of the image and its place in the hierarchy. 
-
+<a id="command-copy-images-hierarchy"></a>
 ## Command copy-images-hierarchy
 
 Let's say you have a given hierarchy of images:
@@ -242,3 +236,12 @@ python-3.9
 ```
 
 For more options run `docker-bakery copy-images-hierarchy help`
+
+<a id="how-to-apply-it-to-your-project"></a>
+# How to apply it to your project
+Applying `docker-bakery` is quite simple. Take a look [here](https://github.com/smartrecruiters/docker-bakery-example#how-to-apply-it-to-your-project)
+
+<a id="limitations"></a>
+# Limitations
+At the moment docker multi-stage builds are not fully supported. Only the first line `FROM` is taken into consideration when determining the parent of the image and its place in the hierarchy. 
+
