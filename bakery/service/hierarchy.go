@@ -10,6 +10,8 @@ import (
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
 )
 
+const dockerFileTemplateName = "Dockerfile.template"
+
 // NewDockerHierarchy initializes new docker hierarchy.
 func NewDockerHierarchy() DockerHierarchy {
 	return &dockerHierarchy{
@@ -48,7 +50,7 @@ func (h *dockerHierarchy) AnalyzeStructure(rootDir string, latestVersions map[st
 		name := sourceInfo.Name()
 		// we can skip analysis of pure dockerfile because if it does not have a template we will not
 		// be able to propagate dependency updates
-		if !sourceInfo.IsDir() && name == "Dockerfile.template" {
+		if !sourceInfo.IsDir() && name == dockerFileTemplateName {
 			dockerImg, err := dockerImgParser.ParseDockerfile(sourcePath)
 			if err != nil {
 				return err

@@ -24,6 +24,8 @@
   - [Command fill-template](#command-fill-template)
   - [Command build](#command-build)
   - [Command push](#command-push)
+  - [Command copy-images-hierarchy](#command-copy-images-hierarchy)
+
 - [How to apply it to your project](#how-to-apply-it-to-your-project)
 - [Limitations](#limitations)
 
@@ -206,6 +208,36 @@ OPTIONS:
 
 ```
 
+<a id="command-copy-images-hierarchy"></a>
+## Command copy-images-hierarchy
+
+Let's say you have a given hierarchy of images:
+```
+python-3.8
+    python-3.8-jdk
+    python-3.8-web
+        python-3.8-flask
+```
+
+If you want to quickly introduce python3.9 for those images, you can:
+1) create `python-3.9` image
+2) recreate images hierarchy
+
+```
+docker-bakery copy-images-hierarchy --config ${path_to_config} --base-image sr-python3.8 -rp 3.8=3.9 -r   
+```
+
+The resulting hierarchy will look like this:
+
+```
+python-3.9
+    python-3.9-jdk
+    python-3.9-web
+        python-3.9-flask
+```
+
+For more options run `docker-bakery copy-images-hierarchy help`
+
 <a id="how-to-apply-it-to-your-project"></a>
 # How to apply it to your project
 Applying `docker-bakery` is quite simple. Take a look [here](https://github.com/smartrecruiters/docker-bakery-example#how-to-apply-it-to-your-project)
@@ -213,3 +245,4 @@ Applying `docker-bakery` is quite simple. Take a look [here](https://github.com/
 <a id="limitations"></a>
 # Limitations
 At the moment docker multi-stage builds are not fully supported. Only the first line `FROM` is taken into consideration when determining the parent of the image and its place in the hierarchy. 
+

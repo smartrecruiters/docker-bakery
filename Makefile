@@ -1,5 +1,5 @@
 APP_NAME=docker-bakery
-VERSION=1.3.2
+VERSION=1.4.0
 
 .DEFAULT_GOAL: all
 
@@ -9,7 +9,7 @@ all: install fmt build test lint
 
 install:
 	@echo "Installing dependencies"
-	go get -v -t ./...
+	dep ensure -v
 
 fmt:
 	@echo "Formating source code"

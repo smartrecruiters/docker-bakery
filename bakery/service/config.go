@@ -79,10 +79,14 @@ func (cfg *Config) setDynamicImageVersionProperty(imgName, version string) {
 }
 
 func dynamicImageVersionName(imgName string) string {
+	imgNameInTmpl := imageNameToVersionFormat(imgName)
+	return fmt.Sprintf("%s_VERSION", imgNameInTmpl)
+}
+
+func imageNameToVersionFormat(imgName string) string {
 	imgNameInTmpl := strings.ToUpper(imgName)
 	imgNameInTmpl = strings.Replace(imgNameInTmpl, "-", "_", -1)
-	imgNameInTmpl = strings.Replace(imgNameInTmpl, ".", "_", -1)
-	return fmt.Sprintf("%s_VERSION", imgNameInTmpl)
+	return strings.Replace(imgNameInTmpl, ".", "_", -1)
 }
 
 // setImageVersion sets the IMAGE_VERSION property to the provided version.
