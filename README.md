@@ -25,6 +25,7 @@
   - [Command build](#command-build)
   - [Command push](#command-push)
   - [Command copy-images-hierarchy](#command-copy-images-hierarchy)
+
 - [How to apply it to your project](#how-to-apply-it-to-your-project)
 - [Limitations](#limitations)
 
