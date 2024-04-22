@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/Masterminds/semver"
-	"github.com/disiqueira/gotree"
+	"github.com/smartrecruiters/gotree"
 )
 
 // Config corresponds to the config structure in json file
