@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/Masterminds/semver"
-	"github.com/disiqueira/gotree"
 	"github.com/smartrecruiters/docker-bakery/bakery/commons"
+	"github.com/smartrecruiters/gotree"
 )
 
 const dockerFileTemplateName = "Dockerfile.template"
