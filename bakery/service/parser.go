@@ -55,6 +55,11 @@ func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerIma
 			return nil, fmt.Errorf("unable to extract dependency from %s file. Check if first line starts with `FROM `", dockerfilePath)
 		}
 
+		asNameIndex := strings.Index(line, " AS ")
+		if asNameIndex != -1 {
+			line = line[:asNameIndex]
+		}
+
 		dependsOnLong := strings.TrimPrefix(line, dependencyPrefix)
 		dependsOnShort := dependsOnLong
 		dependsOnVersion := ""
