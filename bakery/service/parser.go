@@ -55,6 +55,9 @@ func (dip *dockerImageParser) ParseDockerfile(dockerfilePath string) (*DockerIma
 			return nil, fmt.Errorf("unable to extract dependency from %s file. Check if first line starts with `FROM `", dockerfilePath)
 		}
 
+		// keep only "FROM <image-name>" part of the line, so "AS <stage-name>" is removed
+		line = strings.Join(strings.Fields(line)[0:2], " ")
+
 		dependsOnLong := strings.TrimPrefix(line, dependencyPrefix)
 		dependsOnShort := dependsOnLong
 		dependsOnVersion := ""
