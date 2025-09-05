@@ -1,1 +1,1 @@
-FROM ubuntu:2404 as base
+FROM ubuntu:latest as base
