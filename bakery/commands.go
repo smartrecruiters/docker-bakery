@@ -175,7 +175,7 @@ func GetCommands() []cli.Command {
 					Usage: "Optional. Allows for providing additional string replacements, to automate updates in new family. Will change all occurrences in the child images. Expected format is: -rp originalString=replacementString. Example: -rp python3.8=python3.9",
 				},
 			},
-			Usage:  "This command takes 'new-parent-image' image and copies images hierarchy from 'base-image', for example to simplify new image versions when updating some dependencies (for example from Ubuntu 18 to Ubuntu 20, without loosing previous images) ",
+			Usage:  "This command takes 'new-parent-image' image and copies images hierarchy from 'base-image', for example to simplify new image versions when updating some dependencies (for example from Ubuntu 22 to Ubuntu 24, without loosing previous images) ",
 			Before: commands.InitConfiguration,
 			Action: commands.GenerateImagesTree,
 		},

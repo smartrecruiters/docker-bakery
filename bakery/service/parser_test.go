@@ -31,9 +31,9 @@ func TestParserDependenciesFromFromClause(t *testing.T) {
 	dockerImgNamedLowercase, _ := dockerImgParser.ParseDockerfile("testcases/Dockerfile3")
 	dockerImgNamedLowercaseCopy := copyDockerImgObjectForCompare(dockerImgNamedLowercase)
 
-	assert.Equal(t, dockerImgUnnamed.DependsOnLong, "ubuntu:2204")
+	assert.Equal(t, dockerImgUnnamed.DependsOnLong, "ubuntu:latest")
 	assert.Equal(t, dockerImgUnnamed.DependsOnShort, "ubuntu")
-	assert.Equal(t, dockerImgUnnamed.DependsOnVersion, "2204")
+	assert.Equal(t, dockerImgUnnamed.DependsOnVersion, "latest")
 
 	assert.Equal(t, dockerImgUnnamedCopy, dockerImgNamedUppercaseCopy)
 	assert.Equal(t, dockerImgUnnamedCopy, dockerImgNamedLowercaseCopy)
